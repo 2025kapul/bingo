@@ -1,198 +1,1559 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="POSTECH 워크숍 만찬용 모바일 빙고게임">
-  <title>모바일 빙고게임</title>
-  <style>
-    /* CSS 변수 설정 */
-    :root {
-      --postech-red: #C0001A;
-      --postech-green: #009E60;
-      --bg-light: #F5F5F5;
-      --text-dark: #333333;
-      --radius: 8px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    /* 기본 리셋 */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height:100%; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: var(--bg-light); color: var(--text-dark); }
-    /* 화면 공통 스타일 */
-    .screen { display: none; padding: 1rem; height: 100%; overflow-y: auto; }
-    .screen.active { display: block; }
-    h2 { font-size: 1.5rem; margin-bottom: 1rem; }
-    p { margin: 0.5rem 0; }
-    /* 버튼 스타일 */
-    .btn { display: inline-block; text-align: center; padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 500; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.1s, background-color 0.2s; }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: var(--postech-red); color: #fff; }
-    .btn-secondary { background: var(--postech-green); color: #fff; }
-    /* 입력 필드 */
-    input[type="text"], input[type="password"] { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #ccc; border-radius: var(--radius); font-size: 1rem; }
-    input:focus { outline: 2px solid var(--postech-red); }
-    /* 로딩 스피너 */
-    .spinner { display: none; width: 2rem; height: 2rem; border: 4px solid var(--bg-light); border-top-color: var(--postech-red); border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    /* 빙고판 그리드 */
-    .bingo-grid { display: grid; gap: 4px; margin: 1rem 0; }
-    .bingo-cell { background: #fff; border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 0.5rem; font-size: 0.85rem; border-radius: var(--radius); transition: background-color 0.2s; }
-    .bingo-cell.checked { background: var(--postech-green); color: #fff; }
-    /* 랭킹 배너 */
-    .ranking-banner { background: var(--postech-red); color: #fff; padding: 0.5rem; text-align: center; font-size: 1rem; font-weight: bold; }
-    /* 링크 스타일 */
-    a { color: var(--postech-red); word-break: break-all; }
-    /* 반응형 폰트 */
-    @media (min-width: 400px) { body { font-size: 1.1rem; } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 KDC 도서관 빙고 게임 - 2025 사대도협 사무국</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .container-wide {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 44px;
+            user-select: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn:not(:disabled):hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:not(:disabled):active {
+            transform: translateY(0);
+        }
+
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #2563eb; }
+
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover:not(:disabled) { background: #dc2626; }
+
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover:not(:disabled) { background: #d97706; }
+
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover:not(:disabled) { background: #059669; }
+
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-secondary:hover:not(:disabled) { background: #4b5563; }
+
+        .btn-small {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            min-height: 36px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* 입력 필드 */
+        .input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 상태 표시 */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(16, 185, 129, 0.2);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #991b1b;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* 룸 정보 */
+        .room-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .room-code {
+            font-family: 'SF Mono', monospace;
+            font-weight: 700;
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0 0.25rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 통계 그리드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 1.875rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        .stat-blue { color: #3b82f6; }
+        .stat-green { color: #10b981; }
+        .stat-purple { color: #8b5cf6; }
+        .stat-orange { color: #f59e0b; }
+
+        /* 빙고 카드 */
+        .bingo-card {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .bingo-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.25rem;
+            position: relative;
+            transition: all 0.2s ease;
+            min-height: 50px;
+        }
+
+        .bingo-cell.marked {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .bingo-cell.center {
+            background: #f59e0b;
+            color: white;
+            border-color: #d97706;
+        }
+
+        .bingo-cell.marked::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        /* 리더보드 */
+        .leaderboard {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .player-rank {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .rank-1 { background: #fbbf24; color: white; }
+        .rank-2 { background: #9ca3af; color: white; }
+        .rank-3 { background: #fb923c; color: white; }
+        .rank-other { background: #dbeafe; color: #1d4ed8; }
+
+        .player-current {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .bingo-badge {
+            background: #ef4444;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* 모달 */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 현재 주제 */
+        .current-topic {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 컨트롤 패널 */
+        .control-panel {
+            background: rgba(248, 250, 252, 0.8);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.5rem 0;
+        }
+
+        .range-input {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+
+        .range-value {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            min-width: 3rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* 유틸리티 */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+
+        /* 로딩 */
+        .loading {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: white;
+        }
+
+        .spinner {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 푸터 */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+        }
+
+        /* 반응형 */
+        @media (max-width: 640px) {
+            .title { font-size: 2rem; }
+            .card { padding: 1rem; }
+            .bingo-cell { 
+                font-size: 0.65rem; 
+                min-height: 45px;
+                padding: 0.125rem;
+            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .admin-grid { 
+                display: grid; 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 1rem; 
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- 로딩 스피너 -->
-  <div id="spinner" class="spinner"></div>
+    <!-- 로딩 화면 -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <h2>📚 KDC 빙고 로딩중...</h2>
+        <p>게임을 준비하고 있습니다</p>
+    </div>
 
-  <!-- 관리자 로그인 화면 -->
-  <section id="screen-admin-login" class="screen active">
-    <h2>관리자 로그인</h2>
-    <input type="password" id="admin-password" placeholder="비밀번호 입력" />
-    <button class="btn btn-primary" id="btn-admin-login">로그인</button>
-    <p id="admin-login-error" style="color:red;"></p>
-  </section>
+    <!-- 메인 앱 -->
+    <div id="app" class="hidden">
+        <!-- 선택 모드 -->
+        <div id="select-screen">
+            <div class="container">
+                <div class="header">
+                    <h1 class="title">📚 KDC 도서관 빙고</h1>
+                    <p class="subtitle">한국십진분류법 기반 교육 빙고 게임</p>
+                </div>
 
-  <!-- 관리자 설정 화면 -->
-  <section id="screen-admin-setup" class="screen">
-    <h2>게임 설정</h2>
-    <label for="config-size">빙고 크기 (3~5)</label>
-    <input type="text" id="config-size" value="5" />
-    <label for="config-winCount">빙고 줄수 (1~2)</label>
-    <input type="text" id="config-winCount" value="1" />
-    <button class="btn btn-secondary" id="btn-save-config">저장</button>
-    <button class="btn btn-primary" id="btn-create-game">게임 생성</button>
-    <p id="setup-message"></p>
-  </section>
+                <div class="status-bar">
+                    <div id="connection" class="status-badge status-online">
+                        🌐 실시간 연결
+                    </div>
+                    <button id="share-game-btn" class="btn btn-small btn-primary">
+                        🔗 게임 공유
+                    </button>
+                </div>
 
-  <!-- 참가 화면 -->
-  <section id="screen-join" class="screen">
-    <h2>빙고게임 참가</h2>
-    <input type="text" id="user-nickname" placeholder="닉네임 입력 (1~20자)" />
-    <button class="btn btn-primary" id="btn-join">참가하기</button>
-    <p id="join-error" style="color:red;"></p>
-  </section>
+                <div class="room-info">
+                    <span id="room-display">🏢 게임 룸: <span id="room-code-display" class="room-code">ABC123</span></span>
+                </div>
 
-  <!-- 게임 화면 -->
-  <section id="screen-game" class="screen">
-    <div class="ranking-banner" id="current-ranking">순위: --</div>
-    <h2>빙고판</h2>
-    <div id="bingo-grid" class="bingo-grid"></div>
-    <p>빙고 달성 시 자동 인증됩니다!</p>
-  </section>
+                <div class="card">
+                    <h2 class="text-center mb-2">🎯 게임 참여</h2>
+                    
+                    <div id="shared-notice" class="hidden" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center; color: #065f46;">
+                        🎉 공유 링크로 접속하셨습니다!
+                    </div>
+                    
+                    <div class="flex flex-col gap-3">
+                        <button id="admin-mode-btn" class="btn btn-danger btn-full">
+                            🔐 관리자로 게임 진행
+                        </button>
+                        
+                        <input id="player-name-input" type="text" class="input" placeholder="참가자 이름을 입력하세요" maxlength="20">
+                        
+                        <button id="join-game-btn" class="btn btn-primary btn-full" disabled>
+                            👥 참가자로 게임 참여
+                        </button>
+                    </div>
+                </div>
 
-  <!-- 결과 화면 -->
-  <section id="screen-result" class="screen">
-    <h2>🎉 빙고 달성! 🎉</h2>
-    <p id="result-message"></p>
-    <button class="btn btn-primary" id="btn-continue">계속하기</button>
-  </section>
+                <div class="card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3>📊 게임 현황</h3>
+                        <button id="refresh-btn" class="btn btn-small btn-secondary">🔄</button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div id="total-players" class="stat-number stat-blue">0</div>
+                            <div class="stat-label">참가자</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="called-topics" class="stat-number stat-green">0</div>
+                            <div class="stat-label">호출 주제</div>
+                        </div>
+                    </div>
+                </div>
 
-  <script>
-    // API 요청 헬퍼
-    async function apiRequest(path, options = {}) {
-      const spinner = document.getElementById('spinner');
-      spinner.style.display = 'block';
-      try {
-        const res = await fetch((window.BASE_URL||'') + path, options);
-        const data = await res.json();
-        spinner.style.display = 'none';
-        return data;
-      } catch (e) {
-        spinner.style.display = 'none';
-        alert('통신 오류가 발생했습니다. 다시 시도해주세요.');
-        console.error(e);
-      }
-    }
+                <div class="card">
+                    <h4 class="mb-1">💡 사용 방법</h4>
+                    <div id="usage-text" style="font-size: 0.875rem; color: #64748b;">
+                        • 관리자는 4자리 비밀번호로 게임을 진행합니다<br>
+                        • 참가자들은 공유 링크로 접속합니다<br>
+                        • 실시간으로 게임이 동기화됩니다<br>
+                        • 설정된 줄 수를 완성하면 빙고입니다
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // 화면 전환
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+        <!-- 관리자 모드 -->
+        <div id="admin-screen" class="hidden">
+            <div class="container-wide">
+                <div class="header">
+                    <h1 style="color: white;">👑 관리자 패널</h1>
+                    <div class="status-bar">
+                        <button id="back-to-main" class="btn btn-small btn-secondary">← 메인으로</button>
+                        <div id="admin-connection" class="status-badge status-online">🌐 실시간 연결</div>
+                        <button id="share-admin-btn" class="btn btn-small btn-warning">🔗 참가자 링크</button>
+                        <button id="change-password-btn" class="btn btn-small btn-danger">🔐 비밀번호 변경</button>
+                    </div>
+                    <div class="room-info">
+                        룸: <span id="admin-room-code" class="room-code">ABC123</span>
+                    </div>
+                </div>
 
-    // 관리자 로그인
-    document.getElementById('btn-admin-login').onclick = async () => {
-      const pwd = document.getElementById('admin-password').value.trim();
-      if (!pwd) return document.getElementById('admin-login-error').innerText = '비밀번호를 입력하세요.';
-      const data = await apiRequest('/api/admin/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pwd}) });
-      if (data.token) {
-        localStorage.setItem('adminToken', data.token);
-        showScreen('screen-admin-setup');
-      } else document.getElementById('admin-login-error').innerText = data.error || '로그인 실패';
-    };
+                <div class="admin-grid">
+                    <!-- 게임 컨트롤 -->
+                    <div class="card">
+                        <h3 class="mb-2">🎮 게임 컨트롤</h3>
+                        
+                        <div class="control-panel">
+                            <label style="font-weight: 600; color: #8b5cf6; margin-bottom: 0.5rem; display: block;">
+                                🎯 빙고 완성 조건 (필요한 줄 수)
+                            </label>
+                            <div class="range-container">
+                                <input id="bingo-range" type="range" min="1" max="5" value="3" class="range-input">
+                                <div class="range-value">
+                                    <span id="bingo-value">3</span>줄
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #8b5cf6;">
+                                <span>쉬움 (1줄)</span>
+                                <span>어려움 (5줄)</span>
+                            </div>
+                            <div id="range-warning" class="hidden" style="color: #f59e0b; font-size: 0.75rem; margin-top: 0.5rem;">
+                                ⚠️ 게임 중에는 변경할 수 없습니다
+                            </div>
+                        </div>
 
-    // 설정 저장
-    document.getElementById('btn-save-config').onclick = async () => {
-      const size = parseInt(document.getElementById('config-size').value);
-      const winCount = parseInt(document.getElementById('config-winCount').value);
-      const token = localStorage.getItem('adminToken');
-      const gameId = localStorage.getItem('gameId');
-      const data = await apiRequest(`/api/admin/game/${gameId}/config`, { method: 'PUT', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token}, body: JSON.stringify({size, winCount}) });
-      document.getElementById('setup-message').innerText = data.error || '설정 저장 완료';
-    };
+                        <div class="flex gap-2 mb-2">
+                            <button id="game-toggle" class="btn btn-success" style="flex: 1;">
+                                ▶️ 게임 시작
+                            </button>
+                            <button id="reset-game" class="btn btn-secondary">🔄</button>
+                        </div>
 
-    // 게임 생성
-    document.getElementById('btn-create-game').onclick = async () => {
-      const token = localStorage.getItem('adminToken');
-      const data = await apiRequest('/api/admin/game', { method: 'POST', headers: {'Authorization': 'Bearer ' + token} });
-      if (data.gameId) {
-        localStorage.setItem('gameId', data.gameId);
-        document.getElementById('setup-message').innerHTML = `참가 URL: <a href="${data.joinUrl}" target="_blank">${data.joinUrl}</a>`;
-        showScreen('screen-join');
-      }
-    };
+                        <button id="call-topic" class="btn btn-primary btn-full" disabled>
+                            📢 다음 주제 호출 (100개 남음)
+                        </button>
 
-    // 참가
-    document.getElementById('btn-join').onclick = async () => {
-      const nick = document.getElementById('user-nickname').value.trim();
-      if (!nick || nick.length > 20) return document.getElementById('join-error').innerText = '유효한 닉네임을 입력하세요.';
-      const gameId = localStorage.getItem('gameId');
-      const data = await apiRequest('/api/user/join', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({gameId, nickname: nick}) });
-      if (data.userId) {
-        localStorage.setItem('userId', data.userId);
-        renderBingoCard(data.card);
-        showScreen('screen-game');
-      } else document.getElementById('join-error').innerText = data.error;
-    };
+                        <div id="current-topic-card" class="current-topic hidden">
+                            <div style="font-weight: 600; color: #1d4ed8; margin-bottom: 0.25rem;">최근 호출:</div>
+                            <div id="current-topic-name" style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">도서관학</div>
+                            <div id="current-topic-time" style="font-size: 0.75rem; color: #3b82f6;">
+                                방금 호출됨
+                            </div>
+                        </div>
+                    </div>
 
-    // 빙고판 렌더링
-    function renderBingoCard(card) {
-      const grid = document.getElementById('bingo-grid');
-      grid.style.gridTemplateColumns = `repeat(${card.length}, 1fr)`;
-      grid.innerHTML = ''; card.flat().forEach(val => {
-        const cell = document.createElement('div'); cell.className = 'bingo-cell'; cell.innerText = val;
-        cell.onclick = () => handleCellClick(cell, val);
-        grid.appendChild(cell);
-      });
-    }
+                    <!-- 게임 현황 -->
+                    <div class="card">
+                        <h3 class="mb-2">📊 실시간 현황</h3>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div id="admin-players" class="stat-number stat-blue">0</div>
+                                <div class="stat-label">참가자</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="admin-topics" class="stat-number stat-green">0</div>
+                                <div class="stat-label">호출됨</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="admin-condition" class="stat-number stat-purple">3</div>
+                                <div class="stat-label">완성조건</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="admin-completed" class="stat-number stat-orange">0</div>
+                                <div class="stat-label">완성자</div>
+                            </div>
+                        </div>
 
-    // 셀 클릭
-    async function handleCellClick(cell, value) {
-      if (cell.classList.contains('checked')) return;
-      const gameId = localStorage.getItem('gameId'), userId = localStorage.getItem('userId');
-      const data = await apiRequest(`/api/game/${gameId}/user/${userId}/check`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({value}) });
-      if (data.checkedCells) { cell.classList.add('checked'); checkBingo(); }
-    }
+                        <div>
+                            <h4 class="mb-1">최근 호출 주제:</h4>
+                            <div id="topics-history" style="max-height: 120px; overflow-y: auto; background: #f8fafc; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                <div style="text-align: center; color: #64748b; padding: 1rem;">
+                                    아직 호출된 주제가 없습니다
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    // 빙고 인증
-    async function checkBingo() {
-      const gameId = localStorage.getItem('gameId'), userId = localStorage.getItem('userId');
-      const data = await apiRequest(`/api/game/${gameId}/user/${userId}/bingo`, { method: 'POST' });
-      if (data.isBingo) {
-        document.getElementById('result-message').innerText = `순위: ${data.rank} 위!`;
-        showScreen('screen-result');
-      } else updateRanking();
-    }
+                    <!-- 순위표 -->
+                    <div class="card">
+                        <h3 class="mb-2">🏆 실시간 순위 (<span id="rank-count">0</span>명)</h3>
+                        
+                        <div id="admin-leaderboard" class="leaderboard">
+                            <div style="text-align: center; padding: 2rem; color: #64748b;">
+                                👥 참가자가 없습니다
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // 순위 업데이트
-    async function updateRanking() {
-      const gameId = localStorage.getItem('gameId');
-      const data = await apiRequest(`/api/game/${gameId}/ranking?limit=1`);
-      if (data.ranking && data.ranking.length) document.getElementById('current
+        <!-- 플레이어 모드 -->
+        <div id="player-screen" class="hidden">
+            <div class="container">
+                <div class="header">
+                    <h1 id="player-title" style="color: white;">🎯 플레이어님의 빙고</h1>
+                    <div class="status-bar">
+                        <button id="player-back" class="btn btn-small btn-secondary">← 메인으로</button>
+                        <div id="player-connection" class="status-badge status-online">🌐 실시간 연결</div>
+                    </div>
+                    <div class="room-info">
+                        룸: <span id="player-room-code" class="room-code">ABC123</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div id="my-lines" class="stat-number stat-blue">0</div>
+                            <div class="stat-label">빙고 줄</div>
+                            <div id="my-bingo-status" class="hidden bingo-badge" style="margin-top: 0.25rem;">✅ BINGO!</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="my-rank" class="stat-number stat-green">#-</div>
+                            <div class="stat-label">순위</div>
+                            <div id="my-medal" style="font-size: 1.25rem;"></div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="my-condition" class="stat-number stat-purple">3</div>
+                            <div class="stat-label">완성조건</div>
+                            <div id="my-progress" style="font-size: 0.75rem; color: #8b5cf6;">(0개 호출)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="player-current-topic" class="current-topic hidden">
+                    <div style="font-weight: 600; color: #1d4ed8; font-size: 0.875rem;">🔊 최근 호출:</div>
+                    <div id="player-topic-name" style="font-size: 1.125rem; font-weight: 700; color: #1e3a8a;">도서관학</div>
+                    <div id="player-topic-time" style="font-size: 0.75rem; color: #3b82f6;">
+                        방금 호출됨
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="player-bingo-card" class="bingo-card">
+                        <!-- 빙고 카드가 여기에 생성됩니다 -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3>🏆 실시간 순위</h3>
+                        <button id="player-refresh" class="btn btn-small btn-secondary">🔄</button>
+                    </div>
+                    
+                    <div id="player-leaderboard" class="leaderboard">
+                        <div style="text-align: center; padding: 1rem; color: #64748b;">
+                            👥 다른 참가자가 없습니다
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 비밀번호 모달 -->
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-center mb-2">🔐 관리자 인증</h3>
+            
+            <div id="password-setup" class="hidden">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                    <strong>🔑 새 비밀번호를 설정하세요</strong><br>
+                    <small>4자리 숫자로 입력해주세요</small>
+                </div>
+                
+                <div class="mb-2">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">새 비밀번호</label>
+                    <input id="new-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                </div>
+                
+                <div class="mb-2">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">비밀번호 확인</label>
+                    <input id="confirm-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                </div>
+            </div>
+
+            <div id="password-verify">
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                    <strong>🔐 비밀번호를 입력하세요</strong>
+                </div>
+                
+                <div class="mb-2">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">비밀번호</label>
+                    <input id="verify-password" type="password" class="input" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                </div>
+                
+                <div class="text-center mb-2">
+                    <button id="forgot-password" class="btn btn-small btn-secondary">
+                        🔄 비밀번호 재설정
+                    </button>
+                </div>
+            </div>
+
+            <div id="password-error" class="hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem; text-align: center; color: #991b1b;">
+                ❌ 비밀번호가 일치하지 않습니다
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="password-confirm" class="btn btn-primary" style="flex: 1;" disabled>
+                    🔓 확인
+                </button>
+                <button id="password-cancel" class="btn btn-secondary" style="flex: 1;">
+                    취소
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 공유 모달 -->
+    <div id="share-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-center mb-2">🔗 참가자 링크 공유</h3>
+            
+            <div class="mb-2">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">게임 룸 코드</label>
+                <div class="flex gap-2">
+                    <div id="share-room-code" class="room-code" style="flex: 1; text-align: center; padding: 0.75rem; font-size: 1.25rem;">ABC123</div>
+                    <button id="copy-room" class="btn btn-small btn-secondary">📋</button>
+                </div>
+            </div>
+            
+            <div class="mb-2">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">참가자 전용 링크</label>
+                <div id="share-url" style="background: #f8fafc; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; word-break: break-all; max-height: 4rem; overflow-y: auto; border: 1px solid #e2e8f0;">
+                    https://example.com/?room=ABC123&mode=player
+                </div>
+            </div>
+            
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                💡 이 링크로 접속하면 자동으로 참가자 모드로 입장됩니다
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="share-link" class="btn btn-primary" style="flex: 1;">
+                    📱 링크 공유
+                </button>
+                <button id="close-share" class="btn btn-secondary" style="flex: 1;">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <div class="footer">
+        📚 Made by <strong>2025 사대도협 사무국</strong>
+    </div>
+
+    <script>
+        // KDC 주제 데이터
+        const KDC_TOPICS = [
+            '도서관학', '정보학', '백과사전', '논문작성법', '컴퓨터과학', '인터넷', '저널리즘', '신문학', '잡지학', '출판학',
+            '형이상학', '인식론', '논리학', '윤리학', '미학', '심리학', '철학사', '동양철학', '서양철학', '종교철학',
+            '기독교', '불교', '이슬람교', '힌두교', '유교', '도교', '신화학', '종교사', '종교철학', '종교문화',
+            '사회학', '정치학', '행정학', '법학', '경제학', '통계학', '교육학', '민속학', '국방학', '사회문제',
+            '수학', '물리학', '화학', '생물학', '지구과학', '천문학', '기상학', '지질학', '생태학', '환경과학',
+            '의학', '공학', '농학', '건축학', '기계공학', '전자공학', '컴퓨터공학', '화학공학', '토목공학', '산업공학',
+            '미술', '조각', '공예', '서예', '회화', '건축예술', '사진', '음악', '무용', '연극',
+            '언어학', '한국어', '중국어', '일본어', '영어', '독일어', '프랑스어', '스페인어', '러시아어', '아랍어',
+            '문학이론', '한국문학', '중국문학', '일본문학', '영미문학', '독일문학', '프랑스문학', '시문학', '소설', '희곡',
+            '역사학', '한국사', '동양사', '서양사', '세계사', '고고학', '전기', '지리학', '여행기', '문화사'
+        ];
+
+        // 게임 상태 관리
+        class BingoGame {
+            constructor() {
+                this.gameRoom = '';
+                this.gameMode = 'select';
+                this.gameState = 'waiting';
+                this.calledTopics = [];
+                this.currentTopic = '';
+                this.players = new Map();
+                this.playerId = '';
+                this.playerName = '';
+                this.playerCard = [];
+                this.requiredBingoLines = 3;
+                this.isSharedLink = false;
+                this.lastUpdate = Date.now();
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadGameState();
+                this.startSync();
+                this.checkConnection();
+                this.hideLoading();
+            }
+
+            hideLoading() {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+            }
+
+            setupEventListeners() {
+                // 메인 버튼들
+                document.getElementById('admin-mode-btn').addEventListener('click', () => this.showPasswordModal());
+                document.getElementById('join-game-btn').addEventListener('click', () => this.joinAsPlayer());
+                document.getElementById('share-game-btn').addEventListener('click', () => this.showShareModal());
+                document.getElementById('refresh-btn').addEventListener('click', () => this.refreshGame());
+                
+                // 플레이어 이름 입력
+                const nameInput = document.getElementById('player-name-input');
+                nameInput.addEventListener('input', (e) => {
+                    document.getElementById('join-game-btn').disabled = !e.target.value.trim();
+                });
+                nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) this.joinAsPlayer();
+                });
+
+                // 관리자 버튼들
+                document.getElementById('back-to-main').addEventListener('click', () => this.showScreen('select'));
+                document.getElementById('share-admin-btn').addEventListener('click', () => this.showShareModal());
+                document.getElementById('change-password-btn').addEventListener('click', () => this.changePassword());
+                document.getElementById('game-toggle').addEventListener('click', () => this.toggleGame());
+                document.getElementById('reset-game').addEventListener('click', () => this.resetGame());
+                document.getElementById('call-topic').addEventListener('click', () => this.callTopic());
+
+                // 플레이어 버튼들
+                document.getElementById('player-back').addEventListener('click', () => this.showScreen('select'));
+                document.getElementById('player-refresh').addEventListener('click', () => this.refreshGame());
+
+                // 빙고 라인 설정
+                const rangeInput = document.getElementById('bingo-range');
+                rangeInput.addEventListener('input', (e) => {
+                    this.setRequiredLines(parseInt(e.target.value));
+                });
+
+                // 비밀번호 모달
+                document.getElementById('password-confirm').addEventListener('click', () => this.confirmPassword());
+                document.getElementById('password-cancel').addEventListener('click', () => this.hidePasswordModal());
+                document.getElementById('forgot-password').addEventListener('click', () => this.resetPassword());
+
+                // 비밀번호 입력 필드들
+                ['new-password', 'confirm-password', 'verify-password'].forEach(id => {
+                    const input = document.getElementById(id);
+                    input.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                        this.validatePassword();
+                    });
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.confirmPassword();
+                    });
+                });
+
+                // 공유 모달
+                document.getElementById('copy-room').addEventListener('click', () => this.copyText(this.gameRoom));
+                document.getElementById('share-link').addEventListener('click', () => this.shareLink());
+                document.getElementById('close-share').addEventListener('click', () => this.hideShareModal());
+            }
+
+            loadGameState() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const roomId = urlParams.get('room');
+                const mode = urlParams.get('mode');
+                
+                if (roomId) {
+                    this.gameRoom = roomId;
+                    if (mode === 'player') {
+                        this.isSharedLink = true;
+                        document.getElementById('admin-mode-btn').classList.add('hidden');
+                        document.getElementById('shared-notice').classList.remove('hidden');
+                        document.getElementById('share-game-btn').classList.add('hidden');
+                        document.getElementById('usage-text').innerHTML = 
+                            '• 이미 설정된 게임에 참가자로 입장합니다<br>' +
+                            '• 이름을 입력하고 게임에 참여하세요<br>' +
+                            '• 관리자가 주제를 호출하면 자동 업데이트됩니다<br>' +
+                            '• 설정된 줄 수를 완성하면 빙고입니다';
+                    }
+                    
+                    // 저장된 상태 로드
+                    const saved = this.loadSavedState(roomId);
+                    if (saved) this.restoreState(saved);
+                } else {
+                    this.gameRoom = this.generateRoomId();
+                    this.updateUrl();
+                }
+                
+                this.updateUI();
+            }
+
+            generateRoomId() {
+                return Math.random().toString(36).substr(2, 8).toUpperCase();
+            }
+
+            updateUrl() {
+                const params = new URLSearchParams();
+                params.set('room', this.gameRoom);
+                if (this.isSharedLink) params.set('mode', 'player');
+                window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+            }
+
+            loadSavedState(roomId) {
+                try {
+                    const saved = localStorage.getItem(`kdc-bingo-${roomId}`);
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (Date.now() - data.lastUpdate < 24 * 60 * 60 * 1000) {
+                            return data;
+                        }
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            saveState() {
+                try {
+                    const state = {
+                        calledTopics: this.calledTopics,
+                        currentTopic: this.currentTopic,
+                        gameState: this.gameState,
+                        requiredBingoLines: this.requiredBingoLines,
+                        players: Array.from(this.players.entries()),
+                        lastUpdate: Date.now()
+                    };
+                    localStorage.setItem(`kdc-bingo-${this.gameRoom}`, JSON.stringify(state));
+                } catch (e) {}
+            }
+
+            restoreState(saved) {
+                if (saved.calledTopics) this.calledTopics = saved.calledTopics;
+                if (saved.currentTopic) this.currentTopic = saved.currentTopic;
+                if (saved.gameState) this.gameState = saved.gameState;
+                if (saved.requiredBingoLines) this.requiredBingoLines = saved.requiredBingoLines;
+                if (saved.players) this.players = new Map(saved.players);
+                this.lastUpdate = saved.lastUpdate || Date.now();
+            }
+
+            startSync() {
+                setInterval(() => {
+                    this.saveState();
+                    this.loadRemoteState();
+                    this.updateUI();
+                }, 2000);
+            }
+
+            loadRemoteState() {
+                const saved = this.loadSavedState(this.gameRoom);
+                if (saved && saved.lastUpdate > this.lastUpdate) {
+                    this.restoreState(saved);
+                    this.updatePlayerCard();
+                }
+            }
+
+            checkConnection() {
+                setInterval(() => {
+                    const online = navigator.onLine;
+                    document.querySelectorAll('[id$="connection"]').forEach(el => {
+                        el.className = `status-badge ${online ? 'status-online' : 'status-offline'}`;
+                        el.textContent = online ? '🌐 실시간 연결' : '📵 오프라인';
+                    });
+                }, 3000);
+            }
+
+            showScreen(screen) {
+                ['select-screen', 'admin-screen', 'player-screen'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+                document.getElementById(`${screen}-screen`).classList.remove('hidden');
+                this.gameMode = screen;
+                this.updateUI();
+            }
+
+            // 비밀번호 관리
+            showPasswordModal() {
+                const hasPassword = this.hasPassword();
+                document.getElementById('password-setup').classList.toggle('hidden', hasPassword);
+                document.getElementById('password-verify').classList.toggle('hidden', !hasPassword);
+                this.clearPasswordInputs();
+                document.getElementById('password-modal').classList.remove('hidden');
+                
+                if (hasPassword) {
+                    document.getElementById('verify-password').focus();
+                } else {
+                    document.getElementById('new-password').focus();
+                }
+            }
+
+            hidePasswordModal() {
+                document.getElementById('password-modal').classList.add('hidden');
+                this.clearPasswordInputs();
+                this.hidePasswordError();
+            }
+
+            hasPassword() {
+                return localStorage.getItem(`admin-pwd-${this.gameRoom}`) !== null;
+            }
+
+            savePassword(password) {
+                const hash = btoa(password + this.gameRoom);
+                localStorage.setItem(`admin-pwd-${this.gameRoom}`, hash);
+            }
+
+            verifyPassword(password) {
+                const stored = localStorage.getItem(`admin-pwd-${this.gameRoom}`);
+                const hash = btoa(password + this.gameRoom);
+                return stored === hash;
+            }
+
+            confirmPassword() {
+                const hasPassword = this.hasPassword();
+                
+                if (hasPassword) {
+                    const password = document.getElementById('verify-password').value;
+                    if (this.verifyPassword(password)) {
+                        this.hidePasswordModal();
+                        this.showScreen('admin');
+                    } else {
+                        this.showPasswordError('비밀번호가 올바르지 않습니다');
+                    }
+                } else {
+                    const newPwd = document.getElementById('new-password').value;
+                    const confirmPwd = document.getElementById('confirm-password').value;
+                    
+                    if (newPwd.length !== 4) {
+                        this.showPasswordError('4자리 숫자를 입력해주세요');
+                        return;
+                    }
+                    
+                    if (newPwd !== confirmPwd) {
+                        this.showPasswordError('비밀번호가 일치하지 않습니다');
+                        return;
+                    }
+                    
+                    this.savePassword(newPwd);
+                    this.hidePasswordModal();
+                    this.showScreen('admin');
+                    alert('🔐 관리자 비밀번호가 설정되었습니다!');
+                }
+            }
+
+            validatePassword() {
+                const hasPassword = this.hasPassword();
+                const confirmBtn = document.getElementById('password-confirm');
+                
+                if (hasPassword) {
+                    const password = document.getElementById('verify-password').value;
+                    confirmBtn.disabled = password.length !== 4;
+                    confirmBtn.textContent = '🔓 로그인';
+                } else {
+                    const newPwd = document.getElementById('new-password').value;
+                    const confirmPwd = document.getElementById('confirm-password').value;
+                    const valid = newPwd.length === 4 && confirmPwd.length === 4;
+                    
+                    confirmBtn.disabled = !valid;
+                    confirmBtn.textContent = '🔐 비밀번호 설정';
+                    
+                    if (valid && newPwd !== confirmPwd) {
+                        this.showPasswordError('비밀번호가 일치하지 않습니다');
+                    } else {
+                        this.hidePasswordError();
+                    }
+                }
+            }
+
+            showPasswordError(msg) {
+                const errorEl = document.getElementById('password-error');
+                errorEl.textContent = `❌ ${msg}`;
+                errorEl.classList.remove('hidden');
+            }
+
+            hidePasswordError() {
+                document.getElementById('password-error').classList.add('hidden');
+            }
+
+            clearPasswordInputs() {
+                ['new-password', 'confirm-password', 'verify-password'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                this.validatePassword();
+            }
+
+            changePassword() {
+                if (confirm('🔐 관리자 비밀번호를 변경하시겠습니까?')) {
+                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
+                    this.showPasswordModal();
+                }
+            }
+
+            resetPassword() {
+                if (confirm('🔄 비밀번호를 재설정하시겠습니까?')) {
+                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
+                    this.hidePasswordModal();
+                    this.showPasswordModal();
+                }
+            }
+
+            // 공유 기능
+            showShareModal() {
+                document.getElementById('share-room-code').textContent = this.gameRoom;
+                document.getElementById('share-url').textContent = 
+                    `${window.location.origin}${window.location.pathname}?room=${this.gameRoom}&mode=player`;
+                document.getElementById('share-modal').classList.remove('hidden');
+            }
+
+            hideShareModal() {
+                document.getElementById('share-modal').classList.add('hidden');
+            }
+
+            shareLink() {
+                const url = `${window.location.origin}${window.location.pathname}?room=${this.gameRoom}&mode=player`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: '📚 KDC 도서관 빙고 게임',
+                        text: '함께 빙고 게임에 참여하세요!',
+                        url: url
+                    }).catch(() => this.copyText(url));
+                } else {
+                    this.copyText(url);
+                }
+            }
+
+            copyText(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('🔗 클립보드에 복사되었습니다!');
+                    }).catch(() => this.fallbackCopy(text));
+                } else {
+                    this.fallbackCopy(text);
+                }
+            }
+
+            fallbackCopy(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    if (document.execCommand('copy')) {
+                        alert('🔗 클립보드에 복사되었습니다!');
+                    } else {
+                        prompt('링크를 복사하세요:', text);
+                    }
+                } catch (e) {
+                    prompt('링크를 복사하세요:', text);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+
+            // 게임 로직
+            joinAsPlayer() {
+                const name = document.getElementById('player-name-input').value.trim();
+                if (!name) return;
+                
+                this.playerName = name;
+                this.playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                this.playerCard = this.generateBingoCard();
+                this.playerCard[12].marked = true; // 가운데 FREE
+                
+                // 이미 호출된 주제 마킹
+                this.calledTopics.forEach(topic => {
+                    this.playerCard.forEach(cell => {
+                        if (cell.topic === topic) cell.marked = true;
+                    });
+                });
+
+                this.players.set(this.playerId, {
+                    name: this.playerName,
+                    card: this.playerCard,
+                    bingoLines: this.checkBingo(this.playerCard),
+                    joinTime: Date.now()
+                });
+                
+                this.showScreen('player');
+                this.saveState();
+            }
+
+            generateBingoCard() {
+                const shuffled = [...KDC_TOPICS].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, 25).map((topic, index) => ({
+                    id: index,
+                    topic,
+                    marked: false,
+                    isCenter: index === 12
+                }));
+            }
+
+            checkBingo(card) {
+                const grid = [];
+                for (let i = 0; i < 5; i++) {
+                    grid.push(card.slice(i * 5, (i + 1) * 5));
+                }
+
+                let count = 0;
+                
+                // 가로줄
+                for (let i = 0; i < 5; i++) {
+                    if (grid[i].every(cell => cell.marked)) count++;
+                }
+                
+                // 세로줄
+                for (let j = 0; j < 5; j++) {
+                    if (grid.every(row => row[j].marked)) count++;
+                }
+                
+                // 대각선
+                if (grid.every((row, i) => row[i].marked)) count++;
+                if (grid.every((row, i) => row[4 - i].marked)) count++;
+                
+                return count;
+            }
+
+            isBingoComplete(lines) {
+                return lines >= this.requiredBingoLines;
+            }
+
+            toggleGame() {
+                this.gameState = this.gameState === 'playing' ? 'paused' : 'playing';
+                this.saveState();
+                this.updateUI();
+            }
+
+            resetGame() {
+                if (confirm('🔄 게임을 초기화하시겠습니까?')) {
+                    this.calledTopics = [];
+                    this.currentTopic = '';
+                    this.gameState = 'waiting';
+                    this.players.clear();
+                    this.requiredBingoLines = 3;
+                    localStorage.removeItem(`kdc-bingo-${this.gameRoom}`);
+                    this.updateUI();
+                }
+            }
+
+            callTopic() {
+                const uncalled = KDC_TOPICS.filter(topic => !this.calledTopics.includes(topic));
+                if (uncalled.length === 0) return;
+
+                const topic = uncalled[Math.floor(Math.random() * uncalled.length)];
+                this.currentTopic = topic;
+                this.calledTopics.push(topic);
+                this.lastUpdate = Date.now();
+                
+                // 모든 플레이어 카드 업데이트
+                this.players.forEach((player, id) => {
+                    const updatedCard = player.card.map(cell => 
+                        cell.topic === topic ? { ...cell, marked: true } : cell
+                    );
+                    this.players.set(id, {
+                        ...player,
+                        card: updatedCard,
+                        bingoLines: this.checkBingo(updatedCard)
+                    });
+                });
+
+                this.updatePlayerCard();
+                this.saveState();
+                this.updateUI();
+            }
+
+            updatePlayerCard() {
+                if (this.gameMode === 'player' && this.playerId) {
+                    this.playerCard = this.playerCard.map(cell => 
+                        this.calledTopics.includes(cell.topic) ? { ...cell, marked: true } : cell
+                    );
+                    
+                    if (this.players.has(this.playerId)) {
+                        const player = this.players.get(this.playerId);
+                        player.card = this.playerCard;
+                        player.bingoLines = this.checkBingo(this.playerCard);
+                        this.players.set(this.playerId, player);
+                    }
+                }
+            }
+
+            setRequiredLines(lines) {
+                if (this.gameState === 'playing' && this.calledTopics.length > 0) return;
+                this.requiredBingoLines = lines;
+                this.saveState();
+                this.updateUI();
+            }
+
+            refreshGame() {
+                this.loadRemoteState();
+                this.updateUI();
+            }
+
+            getLeaderboard() {
+                return Array.from(this.players.entries())
+                    .map(([id, player]) => ({ id, ...player }))
+                    .sort((a, b) => {
+                        if (b.bingoLines !== a.bingoLines) return b.bingoLines - a.bingoLines;
+                        return a.joinTime - b.joinTime; // 같은 줄 수면 먼저 참여한 사람이 앞서
+                    });
+            }
+
+            updateUI() {
+                this.updateRoomInfo();
+                this.updateStats();
+                this.updateGameControls();
+                this.updateCurrentTopic();
+                this.updateLeaderboard();
+                this.updateBingoCard();
+                this.updatePlayerStatus();
+            }
+
+            updateRoomInfo() {
+                document.querySelectorAll('[id*="room-code"]').forEach(el => {
+                    el.textContent = this.gameRoom;
+                });
+            }
+
+            updateStats() {
+                const playerCount = this.players.size;
+                const topicCount = this.calledTopics.length;
+                
+                document.getElementById('total-players').textContent = playerCount;
+                document.getElementById('called-topics').textContent = topicCount;
+                document.getElementById('admin-players').textContent = playerCount;
+                document.getElementById('admin-topics').textContent = topicCount;
+                document.getElementById('admin-condition').textContent = this.requiredBingoLines;
+                document.getElementById('admin-completed').textContent = 
+                    this.getLeaderboard().filter(p => this.isBingoComplete(p.bingoLines)).length;
+                document.getElementById('rank-count').textContent = playerCount;
+            }
+
+            updateGameControls() {
+                if (this.gameMode !== 'admin') return;
+
+                const toggleBtn = document.getElementById('game-toggle');
+                const callBtn = document.getElementById('call-topic');
+                const rangeInput = document.getElementById('bingo-range');
+                const rangeValue = document.getElementById('bingo-value');
+                const rangeWarning = document.getElementById('range-warning');
+
+                // 게임 토글 버튼
+                if (this.gameState === 'playing') {
+                    toggleBtn.textContent = '⏸️ 일시정지';
+                    toggleBtn.className = 'btn btn-warning';
+                } else {
+                    toggleBtn.textContent = '▶️ 게임 시작';
+                    toggleBtn.className = 'btn btn-success';
+                }
+
+                // 주제 호출 버튼
+                const remaining = KDC_TOPICS.length - this.calledTopics.length;
+                callBtn.textContent = `📢 다음 주제 호출 (${remaining}개 남음)`;
+                callBtn.disabled = this.gameState !== 'playing' || remaining === 0;
+
+                // 빙고 라인 설정
+                rangeInput.value = this.requiredBingoLines;
+                rangeValue.textContent = this.requiredBingoLines;
+                
+                const gameActive = this.gameState === 'playing' && this.calledTopics.length > 0;
+                rangeInput.disabled = gameActive;
+                rangeWarning.classList.toggle('hidden', !gameActive);
+            }
+
+            updateCurrentTopic() {
+                const displays = [
+                    { card: 'current-topic-card', name: 'current-topic-name', time: 'current-topic-time' },
+                    { card: 'player-current-topic', name: 'player-topic-name', time: 'player-topic-time' }
+                ];
+
+                displays.forEach(({ card, name, time }) => {
+                    const cardEl = document.getElementById(card);
+                    if (this.currentTopic) {
+                        document.getElementById(name).textContent = this.currentTopic;
+                        document.getElementById(time).textContent = '방금 호출됨';
+                        cardEl.classList.remove('hidden');
+                    } else {
+                        cardEl.classList.add('hidden');
+                    }
+                });
+
+                // 주제 히스토리
+                const historyEl = document.getElementById('topics-history');
+                if (this.calledTopics.length === 0) {
+                    historyEl.innerHTML = '<div style="text-align: center; color: #64748b; padding: 1rem;">아직 호출된 주제가 없습니다</div>';
+                } else {
+                    historyEl.innerHTML = [...this.calledTopics].reverse().slice(0, 10).map((topic, index) => 
+                        `<div style="padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+                            <span>${topic}</span>
+                            <span style="color: #94a3b8;">#${this.calledTopics.length - index}</span>
+                        </div>`
+                    ).join('');
+                }
+            }
+
+            updateLeaderboard() {
+                const leaderboard = this.getLeaderboard();
+                const containers = ['admin-leaderboard', 'player-leaderboard'];
+
+                containers.forEach(containerId => {
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+
+                    if (leaderboard.length === 0) {
+                        container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">
+                            👥 ${containerId.includes('player') ? '다른 참가자가' : '참가자가'} 없습니다
+                        </div>`;
+                        return;
+                    }
+
+                    container.innerHTML = leaderboard.map((player, index) => {
+                        const isCurrentPlayer = player.id === this.playerId;
+                        const isComplete = this.isBingoComplete(player.bingoLines);
+                        
+                        let rankClass = 'rank-other';
+                        let emoji = '';
+                        let itemClass = 'player-item';
+                        
+                        if (index === 0) {
+                            rankClass = 'rank-1';
+                            emoji = '👑';
+                        } else if (index === 1) {
+                            rankClass = 'rank-2';
+                            emoji = '🥈';
+                        } else if (index === 2) {
+                            rankClass = 'rank-3';
+                            emoji = '🥉';
+                        }
+                        
+                        if (isCurrentPlayer) itemClass += ' player-current';
+
+                        return `
+                            <div class="${itemClass}">
+                                <div class="player-info">
+                                    <div class="player-rank ${rankClass}">${index + 1}</div>
+                                    <div>
+                                        <div style="font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
+                                            ${player.name}
+                                            ${isCurrentPlayer ? '<span style="color: #10b981;">👤</span>' : ''}
+                                        </div>
+                                        <div style="font-size: 0.875rem; color: #64748b;">
+                                            ${player.bingoLines}줄 완성
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    ${emoji ? `<div style="font-size: 1.25rem; margin-bottom: 0.25rem;">${emoji}</div>` : ''}
+                                    ${isComplete ? '<div class="bingo-badge">✅ BINGO!</div>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                });
+            }
+
+            updateBingoCard() {
+                if (this.gameMode !== 'player' || !this.playerCard.length) return;
+
+                const container = document.getElementById('player-bingo-card');
+                container.innerHTML = this.playerCard.map(cell => {
+                    let cellClass = 'bingo-cell';
+                    let content = cell.topic;
+                    
+                    if (cell.isCenter) {
+                        cellClass += ' center';
+                        content = '<div style="font-size: 0.875rem;">⭐</div><div style="font-size: 0.625rem;">FREE</div>';
+                    } else if (cell.marked) {
+                        cellClass += ' marked';
+                    }
+                    
+                    return `<div class="${cellClass}">${content}</div>`;
+                }).join('');
+            }
+
+            updatePlayerStatus() {
+                if (this.gameMode !== 'player') return;
+
+                document.getElementById('player-title').textContent = `🎯 ${this.playerName}님의 빙고`;
+                document.getElementById('my-condition').textContent = this.requiredBingoLines;
+                document.getElementById('my-progress').textContent = `(${this.calledTopics.length}개 호출)`;
+
+                if (this.playerId && this.players.has(this.playerId)) {
+                    const player = this.players.get(this.playerId);
+                    const leaderboard = this.getLeaderboard();
+                    const rank = leaderboard.findIndex(p => p.id === this.playerId) + 1;
+                    const isComplete = this.isBingoComplete(player.bingoLines);
+
+                    document.getElementById('my-lines').textContent = player.bingoLines;
+                    document.getElementById('my-lines').style.color = isComplete ? '#ef4444' : '#3b82f6';
+                    document.getElementById('my-rank').textContent = rank ? `#${rank}` : '#-';
+                    
+                    document.getElementById('my-bingo-status').classList.toggle('hidden', !isComplete);
+                    
+                    const medal = document.getElementById('my-medal');
+                    if (rank === 1) medal.textContent = '👑';
+                    else if (rank === 2) medal.textContent = '🥈';
+                    else if (rank === 3) medal.textContent = '🥉';
+                    else medal.textContent = '';
+                }
+            }
+        }
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', () => {
+            new BingoGame();
+        });
+    </script>
+</body>
+</html>
