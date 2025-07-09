@@ -686,11 +686,17 @@
                         this.ui.sharedNotice.classList.remove('hidden');
                         this.ui.shareGameBtn.classList.add('hidden');
                     }
-                    const saved = this.loadSavedState(roomId);
-                    if (saved) this.restoreState(saved);
+                    const saved = this.loadSavedState(this.gameRoom);
+                    if (saved) {
+                        this.restoreState(saved);
+                    } else {
+                        // If there's a room ID but no state, create a default one
+                        this.saveState();
+                    }
                 } else {
                     this.gameRoom = this.generateRoomId();
                     this.updateUrl();
+                    this.saveState(); // Save initial empty state
                 }
                 this.prevPlayerCount = this.players.size;
                 this.updateUI();
@@ -751,15 +757,15 @@
             startSync() {
                 setInterval(() => {
                     this.loadRemoteState();
-                    this.updateUI();
-                }, 2000);
+                }, 1500); // Poll slightly faster
             }
 
             loadRemoteState() {
                 const saved = this.loadSavedState(this.gameRoom);
                 if (saved && saved.lastUpdate > this.lastUpdate) {
                     this.restoreState(saved);
-                    this.updatePlayerCard();
+                    this.updatePlayerCard(); // Update player card if in player mode
+                    this.updateUI(); // Update UI with the new state
                 }
             }
 
@@ -936,33 +942,52 @@
                 });
             }
 
-            // --- 게임 로직 ---
+            // --- 게임 로직 (Read-Modify-Write 패턴 적용) ---
+            performStateUpdate(updateFunction) {
+                // 1. READ: 최신 상태를 읽어옵니다.
+                const latestState = this.loadSavedState(this.gameRoom);
+                if (latestState) {
+                    this.restoreState(latestState);
+                }
+
+                // 2. MODIFY: 전달된 함수를 실행하여 상태를 변경합니다.
+                updateFunction.call(this);
+
+                // 3. WRITE: 변경된 최신 상태를 저장합니다.
+                this.saveState();
+
+                // 4. 즉시 자신의 UI를 업데이트합니다.
+                this.updateUI();
+            }
+
             joinAsPlayer() {
                 this.initAudio();
                 const name = this.ui.playerNameInput.value.trim();
                 if (!name) return;
-                
-                this.playerName = name;
-                this.playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-                this.playerCard = this.generateBingoCard();
-                this.playerCard[12].marked = true; // 가운데 FREE
 
-                this.calledTopics.forEach(topic => {
-                    this.playerCard.forEach(cell => {
-                        if (cell.topic === topic) cell.marked = true;
+                this.performStateUpdate(() => {
+                    this.playerName = name;
+                    this.playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                    this.playerCard = this.generateBingoCard();
+                    this.playerCard[12].marked = true; // 가운데 FREE
+
+                    this.calledTopics.forEach(topic => {
+                        this.playerCard.forEach(cell => {
+                            if (cell.topic === topic) cell.marked = true;
+                        });
                     });
-                });
 
-                this.players.set(this.playerId, {
-                    id: this.playerId,
-                    name: this.playerName,
-                    card: this.playerCard,
-                    bingoLines: this.checkBingo(this.playerCard),
-                    joinTime: Date.now()
+                    this.players.set(this.playerId, {
+                        id: this.playerId,
+                        name: this.playerName,
+                        card: this.playerCard,
+                        bingoLines: this.checkBingo(this.playerCard),
+                        joinTime: Date.now()
+                    });
+                    
+                    this.myPrevBingoLines = this.checkBingo(this.playerCard);
+                    this.showScreen('player');
                 });
-                
-                this.showScreen('player');
-                this.saveState();
             }
 
             generateBingoCard() {
@@ -989,74 +1014,68 @@
             isBingoComplete(lines) { return lines >= this.requiredBingoLines; }
 
             toggleGame() {
-                this.gameState = this.gameState === 'playing' ? 'paused' : 'playing';
-                this.saveState();
-                this.updateUI();
+                this.performStateUpdate(() => {
+                    this.gameState = this.gameState === 'playing' ? 'paused' : 'playing';
+                });
             }
 
             resetGame() {
                 this.showConfirm('🔄 게임 초기화', '정말로 게임을 초기화하시겠습니까? 모든 참가자 정보가 사라집니다.', () => {
-                    this.calledTopics = [];
-                    this.currentTopic = '';
-                    this.gameState = 'waiting';
-                    this.players.clear();
-                    this.requiredBingoLines = 3;
-                    this.saveState(); // 초기화된 상태를 저장
-                    this.updateUI();
+                    this.performStateUpdate(() => {
+                        this.calledTopics = [];
+                        this.currentTopic = '';
+                        this.gameState = 'waiting';
+                        this.players.clear();
+                        this.requiredBingoLines = 3;
+                    });
                 });
             }
 
             callTopic() {
-                const uncalled = KDC_TOPICS.filter(topic => !this.calledTopics.includes(topic));
-                if (uncalled.length === 0) {
-                    this.showAlert('🎉 종료', '모든 주제를 호출했습니다!');
-                    return;
-                }
+                this.performStateUpdate(() => {
+                    const uncalled = KDC_TOPICS.filter(topic => !this.calledTopics.includes(topic));
+                    if (uncalled.length === 0) {
+                        this.showAlert('🎉 종료', '모든 주제를 호출했습니다!');
+                        return;
+                    }
 
-                const topic = uncalled[Math.floor(Math.random() * uncalled.length)];
-                this.currentTopic = topic;
-                this.calledTopics.push(topic);
-                
-                this.players.forEach((player, id) => {
-                    const updatedCard = player.card.map(cell => 
-                        cell.topic === topic ? { ...cell, marked: true } : cell
-                    );
-                    this.players.set(id, {
-                        ...player,
-                        card: updatedCard,
-                        bingoLines: this.checkBingo(updatedCard)
+                    const topic = uncalled[Math.floor(Math.random() * uncalled.length)];
+                    this.currentTopic = topic;
+                    this.calledTopics.push(topic);
+                    
+                    this.players.forEach((player, id) => {
+                        const updatedCard = player.card.map(cell => 
+                            cell.topic === topic ? { ...cell, marked: true } : cell
+                        );
+                        this.players.set(id, {
+                            ...player,
+                            card: updatedCard,
+                            bingoLines: this.checkBingo(updatedCard)
+                        });
                     });
-                });
 
-                this.updatePlayerCard();
-                this.saveState();
-                this.updateUI();
+                    this.updatePlayerCard();
+                });
             }
 
             updatePlayerCard() {
                 if (this.gameMode === 'player' && this.playerId) {
-                    this.playerCard = this.playerCard.map(cell => 
-                        this.calledTopics.includes(cell.topic) ? { ...cell, marked: true } : cell
-                    );
                     if (this.players.has(this.playerId)) {
                         const player = this.players.get(this.playerId);
-                        player.card = this.playerCard;
-                        player.bingoLines = this.checkBingo(this.playerCard);
-                        this.players.set(this.playerId, player);
+                        this.playerCard = player.card;
                     }
                 }
             }
 
             setRequiredLines(lines) {
                 if (this.gameState === 'playing' && this.calledTopics.length > 0) return;
-                this.requiredBingoLines = lines;
-                this.saveState();
-                this.updateUI();
+                this.performStateUpdate(() => {
+                    this.requiredBingoLines = lines;
+                });
             }
 
             refreshGame() {
                 this.loadRemoteState();
-                this.updateUI();
             }
 
             getLeaderboard() {
