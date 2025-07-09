@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 KDC 도서관 빙고 게임 - 2025 사대도협 사무국</title>
     <style>
+        /* --- 기본 & 레이아웃 --- */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --secondary-color: #6b7280;
+            --light-gray: #f3f4f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,15 +25,16 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #1a202c;
-            line-height: 1.6;
+            color: var(--text-dark);
+            line-height: 1.7;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 480px;
+            max-width: 520px;
             margin: 0 auto;
             padding: 1rem;
         }
@@ -32,13 +46,13 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
             border-radius: 1rem;
             padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
         .header {
@@ -47,9 +61,9 @@
         }
 
         .title {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #6366f1, #ec4899);
+            background: linear-gradient(135deg, #818cf8, #fbcfe8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -57,12 +71,12 @@
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             font-size: 1.1rem;
             margin-bottom: 1rem;
         }
 
-        /* 버튼 스타일 */
+        /* --- 버튼 --- */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -72,11 +86,11 @@
             border: none;
             border-radius: 0.5rem;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
-            min-height: 44px;
+            min-height: 48px;
             user-select: none;
         }
 
@@ -84,42 +98,35 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
+            background-color: #9ca3af;
         }
 
         .btn:not(:disabled):hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .btn:not(:disabled):active {
             transform: translateY(0);
+            box-shadow: none;
         }
 
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-primary:hover:not(:disabled) { background: #2563eb; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 
-        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger { background: var(--danger-color); color: white; }
         .btn-danger:hover:not(:disabled) { background: #dc2626; }
 
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover:not(:disabled) { background: #d97706; }
-
-        .btn-success { background: #10b981; color: white; }
+        .btn-success { background: var(--success-color); color: white; }
         .btn-success:hover:not(:disabled) { background: #059669; }
 
-        .btn-secondary { background: #6b7280; color: white; }
+        .btn-secondary { background: var(--secondary-color); color: white; }
         .btn-secondary:hover:not(:disabled) { background: #4b5563; }
 
-        .btn-small {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            min-height: 36px;
-        }
+        .btn-small { padding: 0.5rem 0.75rem; font-size: 0.875rem; min-height: 38px; }
+        .btn-full { width: 100%; }
 
-        .btn-full {
-            width: 100%;
-        }
-
-        /* 입력 필드 */
+        /* --- 입력 필드 --- */
         .input {
             width: 100%;
             padding: 0.875rem 1rem;
@@ -127,136 +134,59 @@
             border-radius: 0.5rem;
             font-size: 1rem;
             background: white;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
-        /* 상태 표시 */
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
+        /* --- 컴포넌트 --- */
+        .status-bar { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .status-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.875rem; font-weight: 500; }
+        .status-online { background: rgba(16, 185, 129, 0.15); color: #065f46; }
+        .status-offline { background: rgba(239, 68, 68, 0.15); color: #991b1b; }
 
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
+        .room-info { background: rgba(255, 255, 255, 0.2); border-radius: 0.5rem; padding: 0.75rem; text-align: center; margin-bottom: 1rem; color: white; font-weight: 500;}
+        .room-code { font-family: 'SF Mono', monospace; font-weight: 700; background: white; color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 0.25rem; margin: 0 0.25rem; border: 1px solid #e2e8f0; }
 
-        .status-online {
-            background: rgba(16, 185, 129, 0.2);
-            color: #065f46;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .stat-card { background: var(--light-gray); border-radius: 0.75rem; padding: 1rem; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
+        .stat-blue { color: #3b82f6; } .stat-green { color: #10b981; } .stat-purple { color: #8b5cf6; } .stat-orange { color: #f59e0b; }
 
-        .status-offline {
-            background: rgba(239, 68, 68, 0.2);
-            color: #991b1b;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        /* 룸 정보 */
-        .room-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .room-code {
-            font-family: 'SF Mono', monospace;
-            font-weight: 700;
-            background: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            margin: 0 0.25rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        /* 통계 그리드 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .stat-number {
-            font-size: 1.875rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            font-weight: 600;
-        }
-
-        .stat-blue { color: #3b82f6; }
-        .stat-green { color: #10b981; }
-        .stat-purple { color: #8b5cf6; }
-        .stat-orange { color: #f59e0b; }
-
-        /* 빙고 카드 */
-        .bingo-card {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px;
-            background: #f1f5f9;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
+        /* --- 빙고 카드 --- */
+        .bingo-card { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; background: #e0e7ff; padding: 0.75rem; border-radius: 0.75rem; margin-bottom: 1rem; }
         .bingo-cell {
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             background: white;
-            border: 1px solid #cbd5e1;
             border-radius: 0.375rem;
-            font-size: 0.7rem;
+            font-size: 0.75rem; /* 가독성 향상 */
             font-weight: 600;
             text-align: center;
             padding: 0.25rem;
             position: relative;
-            transition: all 0.2s ease;
-            min-height: 50px;
+            transition: all 0.3s ease;
+            min-height: 60px;
+            line-height: 1.3; /* 줄 간격 추가 */
+            word-break: keep-all; /* 단어 단위 줄바꿈 */
         }
 
         .bingo-cell.marked {
-            background: #3b82f6;
+            background: var(--primary-color);
             color: white;
-            border-color: #2563eb;
+            transform: rotateY(360deg);
+            border-color: var(--primary-hover);
         }
 
         .bingo-cell.center {
-            background: #f59e0b;
+            background: var(--warning-color);
             color: white;
             border-color: #d97706;
         }
@@ -266,283 +196,105 @@
             position: absolute;
             top: 2px;
             right: 4px;
-            font-size: 0.875rem;
+            font-size: 1rem;
             font-weight: bold;
+            text-shadow: 0 0 3px rgba(0,0,0,0.2);
         }
+        
+        /* --- 리더보드 --- */
+        .leaderboard { max-height: 320px; overflow-y: auto; padding-right: 5px; }
+        .player-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; margin-bottom: 0.5rem; background: var(--light-gray); border-radius: 0.5rem; }
+        .player-info { display: flex; align-items: center; gap: 0.75rem; }
+        .player-rank { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; color: white; }
+        .rank-1 { background: #fbbf24; } .rank-2 { background: #a1a1aa; } .rank-3 { background: #fb923c; } .rank-other { background: #d1d5db; color: var(--text-dark); }
+        .player-current { background: #c7d2fe; border: 2px solid var(--primary-color); }
+        .bingo-badge { background: var(--danger-color); color: white; padding: 0.25rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
 
-        /* 리더보드 */
-        .leaderboard {
-            max-height: 300px;
-            overflow-y: auto;
-        }
+        /* --- 모달 --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; border-radius: 1rem; padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
 
-        .player-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+        /* --- 기타 --- */
+        .control-panel { background: var(--light-gray); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+        .current-topic { background: #e0e7ff; border-left: 4px solid var(--primary-color); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .range-container { display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0; }
+        .range-input { flex: 1; -webkit-appearance: none; background: #d1d5db; height: 6px; border-radius: 3px; outline: none; }
+        .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary-color); cursor: pointer; }
+        .range-value { background: white; border: 1px solid #e2e8f0; border-radius: 0.25rem; padding: 0.5rem; min-width: 3.5rem; text-align: center; font-weight: 700; }
 
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .player-rank {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.875rem;
-        }
-
-        .rank-1 { background: #fbbf24; color: white; }
-        .rank-2 { background: #9ca3af; color: white; }
-        .rank-3 { background: #fb923c; color: white; }
-        .rank-other { background: #dbeafe; color: #1d4ed8; }
-
-        .player-current {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: rgba(16, 185, 129, 0.5);
-        }
-
-        .bingo-badge {
-            background: #ef4444;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        /* 모달 */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 현재 주제 */
-        .current-topic {
-            background: rgba(59, 130, 246, 0.1);
-            border-left: 4px solid #3b82f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        /* 컨트롤 패널 */
-        .control-panel {
-            background: rgba(248, 250, 252, 0.8);
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .range-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin: 0.5rem 0;
-        }
-
-        .range-input {
-            flex: 1;
-            height: 4px;
-            border-radius: 2px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .range-input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-        }
-
-        .range-value {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            min-width: 3rem;
-            text-align: center;
-            font-weight: 700;
-        }
-
-        /* 유틸리티 */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
-        .mb-1 { margin-bottom: 0.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-3 { gap: 0.75rem; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
+        .mb-1 { margin-bottom: 0.5rem; } .mb-2 { margin-bottom: 1rem; } .mb-3 { margin-bottom: 1.5rem; }
+        .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; }
+        .flex { display: flex; } .flex-col { flex-direction: column; }
+        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
 
-        /* 로딩 */
-        .loading {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: white;
-        }
+        .loading { text-align: center; padding: 3rem 1rem; color: white; }
+        .spinner { width: 2.5rem; height: 2.5rem; border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .spinner {
-            width: 2.5rem;
-            height: 2.5rem;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
+        .footer { text-align: center; padding: 2rem 0; color: rgba(255, 255, 255, 0.85); font-size: 0.875rem; }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 푸터 */
-        .footer {
-            text-align: center;
-            padding: 2rem 0;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.875rem;
-        }
-
-        /* 반응형 */
+        /* --- 반응형 --- */
         @media (max-width: 640px) {
-            .title { font-size: 2rem; }
-            .card { padding: 1rem; }
-            .bingo-cell { 
-                font-size: 0.65rem; 
-                min-height: 45px;
-                padding: 0.125rem;
-            }
+            .title { font-size: 2.25rem; }
+            .card { padding: 1.25rem; }
+            .bingo-cell { font-size: 0.65rem; min-height: 50px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (min-width: 1024px) {
-            .admin-grid { 
-                display: grid; 
-                grid-template-columns: repeat(3, 1fr); 
-                gap: 1rem; 
-            }
+            .admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
         }
     </style>
 </head>
 <body>
-    <!-- 로딩 화면 -->
     <div id="loading" class="loading">
         <div class="spinner"></div>
         <h2>📚 KDC 빙고 로딩중...</h2>
         <p>게임을 준비하고 있습니다</p>
     </div>
 
-    <!-- 메인 앱 -->
     <div id="app" class="hidden">
-        <!-- 선택 모드 -->
+        <!-- 화면들 (선택, 관리자, 플레이어) -->
         <div id="select-screen">
             <div class="container">
                 <div class="header">
                     <h1 class="title">📚 KDC 도서관 빙고</h1>
                     <p class="subtitle">한국십진분류법 기반 교육 빙고 게임</p>
                 </div>
-
                 <div class="status-bar">
-                    <div id="connection" class="status-badge status-online">
-                        🌐 실시간 연결
-                    </div>
-                    <button id="share-game-btn" class="btn btn-small btn-primary">
-                        🔗 게임 공유
-                    </button>
+                    <div id="connection" class="status-badge status-online">🌐 실시간 연결</div>
+                    <button id="share-game-btn" class="btn btn-small btn-primary">🔗 게임 공유</button>
                 </div>
-
                 <div class="room-info">
-                    <span id="room-display">🏢 게임 룸: <span id="room-code-display" class="room-code">ABC123</span></span>
+                    <span>🏢 게임 룸: <span id="room-code-display" class="room-code"></span></span>
                 </div>
-
                 <div class="card">
                     <h2 class="text-center mb-2">🎯 게임 참여</h2>
-                    
-                    <div id="shared-notice" class="hidden" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center; color: #065f46;">
+                    <div id="shared-notice" class="hidden" style="background: rgba(16, 185, 129, 0.1); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center; color: #065f46;">
                         🎉 공유 링크로 접속하셨습니다!
                     </div>
-                    
                     <div class="flex flex-col gap-3">
-                        <button id="admin-mode-btn" class="btn btn-danger btn-full">
-                            🔐 관리자로 게임 진행
-                        </button>
-                        
+                        <button id="admin-mode-btn" class="btn btn-danger btn-full">🔐 관리자로 게임 진행</button>
                         <input id="player-name-input" type="text" class="input" placeholder="참가자 이름을 입력하세요" maxlength="20">
-                        
-                        <button id="join-game-btn" class="btn btn-primary btn-full" disabled>
-                            👥 참가자로 게임 참여
-                        </button>
+                        <button id="join-game-btn" class="btn btn-primary btn-full" disabled>👥 참가자로 게임 참여</button>
                     </div>
                 </div>
-
                 <div class="card">
                     <div class="flex items-center justify-between mb-2">
                         <h3>📊 게임 현황</h3>
                         <button id="refresh-btn" class="btn btn-small btn-secondary">🔄</button>
                     </div>
-                    
                     <div class="stats-grid">
-                        <div class="stat-card">
-                            <div id="total-players" class="stat-number stat-blue">0</div>
-                            <div class="stat-label">참가자</div>
-                        </div>
-                        <div class="stat-card">
-                            <div id="called-topics" class="stat-number stat-green">0</div>
-                            <div class="stat-label">호출 주제</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h4 class="mb-1">💡 사용 방법</h4>
-                    <div id="usage-text" style="font-size: 0.875rem; color: #64748b;">
-                        • 관리자는 4자리 비밀번호로 게임을 진행합니다<br>
-                        • 참가자들은 공유 링크로 접속합니다<br>
-                        • 실시간으로 게임이 동기화됩니다<br>
-                        • 설정된 줄 수를 완성하면 빙고입니다
+                        <div class="stat-card"><div id="total-players" class="stat-number stat-blue">0</div><div class="stat-label">참가자</div></div>
+                        <div class="stat-card"><div id="called-topics" class="stat-number stat-green">0</div><div class="stat-label">호출 주제</div></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 관리자 모드 -->
         <div id="admin-screen" class="hidden">
             <div class="container-wide">
                 <div class="header">
@@ -550,259 +302,137 @@
                     <div class="status-bar">
                         <button id="back-to-main" class="btn btn-small btn-secondary">← 메인으로</button>
                         <div id="admin-connection" class="status-badge status-online">🌐 실시간 연결</div>
-                        <button id="share-admin-btn" class="btn btn-small btn-warning">🔗 참가자 링크</button>
+                        <button id="share-admin-btn" class="btn btn-small btn-primary">🔗 참가자 링크</button>
                         <button id="change-password-btn" class="btn btn-small btn-danger">🔐 비밀번호 변경</button>
                     </div>
-                    <div class="room-info">
-                        룸: <span id="admin-room-code" class="room-code">ABC123</span>
-                    </div>
+                    <div class="room-info">룸: <span id="admin-room-code" class="room-code"></span></div>
                 </div>
-
                 <div class="admin-grid">
-                    <!-- 게임 컨트롤 -->
                     <div class="card">
                         <h3 class="mb-2">🎮 게임 컨트롤</h3>
-                        
                         <div class="control-panel">
-                            <label style="font-weight: 600; color: #8b5cf6; margin-bottom: 0.5rem; display: block;">
-                                🎯 빙고 완성 조건 (필요한 줄 수)
-                            </label>
+                            <label style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">🎯 빙고 완성 조건 (줄 수)</label>
                             <div class="range-container">
                                 <input id="bingo-range" type="range" min="1" max="5" value="3" class="range-input">
-                                <div class="range-value">
-                                    <span id="bingo-value">3</span>줄
-                                </div>
+                                <div class="range-value"><span id="bingo-value">3</span>줄</div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #8b5cf6;">
-                                <span>쉬움 (1줄)</span>
-                                <span>어려움 (5줄)</span>
-                            </div>
-                            <div id="range-warning" class="hidden" style="color: #f59e0b; font-size: 0.75rem; margin-top: 0.5rem;">
-                                ⚠️ 게임 중에는 변경할 수 없습니다
-                            </div>
+                            <div id="range-warning" class="hidden" style="color: var(--warning-color); font-size: 0.75rem; margin-top: 0.5rem;">⚠️ 게임 중에는 변경할 수 없습니다</div>
                         </div>
-
                         <div class="flex gap-2 mb-2">
-                            <button id="game-toggle" class="btn btn-success" style="flex: 1;">
-                                ▶️ 게임 시작
-                            </button>
+                            <button id="game-toggle" class="btn btn-success" style="flex: 1;">▶️ 게임 시작</button>
                             <button id="reset-game" class="btn btn-secondary">🔄</button>
                         </div>
-
-                        <button id="call-topic" class="btn btn-primary btn-full" disabled>
-                            📢 다음 주제 호출 (100개 남음)
-                        </button>
-
+                        <button id="call-topic" class="btn btn-primary btn-full" disabled>📢 다음 주제 호출</button>
                         <div id="current-topic-card" class="current-topic hidden">
                             <div style="font-weight: 600; color: #1d4ed8; margin-bottom: 0.25rem;">최근 호출:</div>
-                            <div id="current-topic-name" style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">도서관학</div>
-                            <div id="current-topic-time" style="font-size: 0.75rem; color: #3b82f6;">
-                                방금 호출됨
-                            </div>
+                            <div id="current-topic-name" style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a;"></div>
                         </div>
                     </div>
-
-                    <!-- 게임 현황 -->
                     <div class="card">
                         <h3 class="mb-2">📊 실시간 현황</h3>
-                        
                         <div class="stats-grid">
-                            <div class="stat-card">
-                                <div id="admin-players" class="stat-number stat-blue">0</div>
-                                <div class="stat-label">참가자</div>
-                            </div>
-                            <div class="stat-card">
-                                <div id="admin-topics" class="stat-number stat-green">0</div>
-                                <div class="stat-label">호출됨</div>
-                            </div>
-                            <div class="stat-card">
-                                <div id="admin-condition" class="stat-number stat-purple">3</div>
-                                <div class="stat-label">완성조건</div>
-                            </div>
-                            <div class="stat-card">
-                                <div id="admin-completed" class="stat-number stat-orange">0</div>
-                                <div class="stat-label">완성자</div>
-                            </div>
+                            <div class="stat-card"><div id="admin-players" class="stat-number stat-blue">0</div><div class="stat-label">참가자</div></div>
+                            <div class="stat-card"><div id="admin-topics" class="stat-number stat-green">0</div><div class="stat-label">호출됨</div></div>
+                            <div class="stat-card"><div id="admin-condition" class="stat-number stat-purple">3</div><div class="stat-label">완성조건</div></div>
+                            <div class="stat-card"><div id="admin-completed" class="stat-number stat-orange">0</div><div class="stat-label">완성자</div></div>
                         </div>
-
                         <div>
                             <h4 class="mb-1">최근 호출 주제:</h4>
-                            <div id="topics-history" style="max-height: 120px; overflow-y: auto; background: #f8fafc; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                                <div style="text-align: center; color: #64748b; padding: 1rem;">
-                                    아직 호출된 주제가 없습니다
-                                </div>
-                            </div>
+                            <div id="topics-history" style="max-height: 120px; overflow-y: auto; background: var(--light-gray); padding: 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;"></div>
                         </div>
                     </div>
-
-                    <!-- 순위표 -->
                     <div class="card">
                         <h3 class="mb-2">🏆 실시간 순위 (<span id="rank-count">0</span>명)</h3>
-                        
-                        <div id="admin-leaderboard" class="leaderboard">
-                            <div style="text-align: center; padding: 2rem; color: #64748b;">
-                                👥 참가자가 없습니다
-                            </div>
-                        </div>
+                        <div id="admin-leaderboard" class="leaderboard"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 플레이어 모드 -->
         <div id="player-screen" class="hidden">
             <div class="container">
                 <div class="header">
-                    <h1 id="player-title" style="color: white;">🎯 플레이어님의 빙고</h1>
+                    <h1 id="player-title" style="color: white;"></h1>
                     <div class="status-bar">
                         <button id="player-back" class="btn btn-small btn-secondary">← 메인으로</button>
                         <div id="player-connection" class="status-badge status-online">🌐 실시간 연결</div>
                     </div>
-                    <div class="room-info">
-                        룸: <span id="player-room-code" class="room-code">ABC123</span>
-                    </div>
+                    <div class="room-info">룸: <span id="player-room-code" class="room-code"></span></div>
                 </div>
-
                 <div class="card">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div id="my-lines" class="stat-number stat-blue">0</div>
-                            <div class="stat-label">빙고 줄</div>
-                            <div id="my-bingo-status" class="hidden bingo-badge" style="margin-top: 0.25rem;">✅ BINGO!</div>
-                        </div>
-                        <div class="stat-card">
-                            <div id="my-rank" class="stat-number stat-green">#-</div>
-                            <div class="stat-label">순위</div>
-                            <div id="my-medal" style="font-size: 1.25rem;"></div>
-                        </div>
-                        <div class="stat-card">
-                            <div id="my-condition" class="stat-number stat-purple">3</div>
-                            <div class="stat-label">완성조건</div>
-                            <div id="my-progress" style="font-size: 0.75rem; color: #8b5cf6;">(0개 호출)</div>
-                        </div>
+                    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card"><div id="my-lines" class="stat-number stat-blue">0</div><div class="stat-label">빙고 줄</div><div id="my-bingo-status" class="hidden bingo-badge" style="margin-top: 0.25rem;">✅ BINGO!</div></div>
+                        <div class="stat-card"><div id="my-rank" class="stat-number stat-green">#-</div><div class="stat-label">순위</div><div id="my-medal" style="font-size: 1.25rem;"></div></div>
+                        <div class="stat-card"><div id="my-condition" class="stat-number stat-purple">3</div><div class="stat-label">완성조건</div></div>
                     </div>
                 </div>
-
                 <div id="player-current-topic" class="current-topic hidden">
                     <div style="font-weight: 600; color: #1d4ed8; font-size: 0.875rem;">🔊 최근 호출:</div>
-                    <div id="player-topic-name" style="font-size: 1.125rem; font-weight: 700; color: #1e3a8a;">도서관학</div>
-                    <div id="player-topic-time" style="font-size: 0.75rem; color: #3b82f6;">
-                        방금 호출됨
-                    </div>
+                    <div id="player-topic-name" style="font-size: 1.125rem; font-weight: 700; color: #1e3a8a;"></div>
                 </div>
-
                 <div class="card">
-                    <div id="player-bingo-card" class="bingo-card">
-                        <!-- 빙고 카드가 여기에 생성됩니다 -->
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3>🏆 실시간 순위</h3>
-                        <button id="player-refresh" class="btn btn-small btn-secondary">🔄</button>
-                    </div>
-                    
-                    <div id="player-leaderboard" class="leaderboard">
-                        <div style="text-align: center; padding: 1rem; color: #64748b;">
-                            👥 다른 참가자가 없습니다
-                        </div>
-                    </div>
+                    <div id="player-bingo-card" class="bingo-card"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 관리자 비밀번호 모달 -->
-    <div id="password-modal" class="modal hidden">
+    <!-- 맞춤형 모달 (알림, 확인) -->
+    <div id="custom-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="text-center mb-2">🔐 관리자 인증</h3>
-            
+            <h3 id="modal-title" class="text-center mb-3"></h3>
+            <p id="modal-text" class="text-center mb-3" style="color: var(--text-light);"></p>
+            <div id="modal-buttons" class="flex gap-3"></div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 모달 -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-center mb-3">🔐 관리자 인증</h3>
             <div id="password-setup" class="hidden">
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
-                    <strong>🔑 새 비밀번호를 설정하세요</strong><br>
-                    <small>4자리 숫자로 입력해주세요</small>
+                <div style="background: rgba(245, 158, 11, 0.1); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                    <strong>🔑 새 비밀번호를 설정하세요</strong><br><small>4자리 숫자로 입력해주세요</small>
                 </div>
-                
-                <div class="mb-2">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">새 비밀번호</label>
-                    <input id="new-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
-                </div>
-                
-                <div class="mb-2">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">비밀번호 확인</label>
-                    <input id="confirm-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
-                </div>
+                <div class="mb-2"><label class="mb-1" style="font-weight: 600;">새 비밀번호</label><input id="new-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;"></div>
+                <div class="mb-2"><label class="mb-1" style="font-weight: 600;">비밀번호 확인</label><input id="confirm-password" type="password" class="input" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;"></div>
             </div>
-
             <div id="password-verify">
-                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
-                    <strong>🔐 비밀번호를 입력하세요</strong>
-                </div>
-                
-                <div class="mb-2">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">비밀번호</label>
-                    <input id="verify-password" type="password" class="input" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
-                </div>
-                
-                <div class="text-center mb-2">
-                    <button id="forgot-password" class="btn btn-small btn-secondary">
-                        🔄 비밀번호 재설정
-                    </button>
-                </div>
+                <div style="background: rgba(79, 70, 229, 0.1); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;"><strong>🔐 비밀번호를 입력하세요</strong></div>
+                <div class="mb-2"><label class="mb-1" style="font-weight: 600;">비밀번호</label><input id="verify-password" type="password" class="input" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;"></div>
+                <div class="text-center mb-2"><button id="forgot-password" class="btn btn-small btn-secondary">🔄 비밀번호 재설정</button></div>
             </div>
-
-            <div id="password-error" class="hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem; text-align: center; color: #991b1b;">
-                ❌ 비밀번호가 일치하지 않습니다
-            </div>
-            
+            <div id="password-error" class="hidden" style="background: rgba(239, 68, 68, 0.1); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center; color: #991b1b;"></div>
             <div class="flex gap-3">
-                <button id="password-confirm" class="btn btn-primary" style="flex: 1;" disabled>
-                    🔓 확인
-                </button>
-                <button id="password-cancel" class="btn btn-secondary" style="flex: 1;">
-                    취소
-                </button>
+                <button id="password-confirm" class="btn btn-primary" style="flex: 1;" disabled>🔓 확인</button>
+                <button id="password-cancel" class="btn btn-secondary" style="flex: 1;">취소</button>
             </div>
         </div>
     </div>
-
+    
     <!-- 공유 모달 -->
-    <div id="share-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="text-center mb-2">🔗 참가자 링크 공유</h3>
-            
+    <div id="share-modal" class="modal-overlay">
+         <div class="modal-content">
+            <h3 class="text-center mb-3">🔗 참가자 링크 공유</h3>
             <div class="mb-2">
-                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">게임 룸 코드</label>
+                <label class="mb-1" style="font-weight: 600;">게임 룸 코드</label>
                 <div class="flex gap-2">
-                    <div id="share-room-code" class="room-code" style="flex: 1; text-align: center; padding: 0.75rem; font-size: 1.25rem;">ABC123</div>
+                    <div id="share-room-code" class="room-code" style="flex: 1; text-align: center; padding: 0.75rem; font-size: 1.25rem;"></div>
                     <button id="copy-room" class="btn btn-small btn-secondary">📋</button>
                 </div>
             </div>
-            
             <div class="mb-2">
-                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">참가자 전용 링크</label>
-                <div id="share-url" style="background: #f8fafc; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; word-break: break-all; max-height: 4rem; overflow-y: auto; border: 1px solid #e2e8f0;">
-                    https://example.com/?room=ABC123&mode=player
-                </div>
+                <label class="mb-1" style="font-weight: 600;">참가자 전용 링크</label>
+                <div id="share-url" style="background: var(--light-gray); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; word-break: break-all; max-height: 4rem; overflow-y: auto; border: 1px solid #e2e8f0;"></div>
             </div>
-            
-            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
-                💡 이 링크로 접속하면 자동으로 참가자 모드로 입장됩니다
-            </div>
-            
             <div class="flex gap-3">
-                <button id="share-link" class="btn btn-primary" style="flex: 1;">
-                    📱 링크 공유
-                </button>
-                <button id="close-share" class="btn btn-secondary" style="flex: 1;">
-                    닫기
-                </button>
+                <button id="share-link" class="btn btn-primary" style="flex: 1;">📱 링크 공유</button>
+                <button id="close-share" class="btn btn-secondary" style="flex: 1;">닫기</button>
             </div>
         </div>
     </div>
 
-    <!-- 푸터 -->
+
     <div class="footer">
         📚 Made by <strong>2025 사대도협 사무국</strong>
     </div>
@@ -822,9 +452,9 @@
             '역사학', '한국사', '동양사', '서양사', '세계사', '고고학', '전기', '지리학', '여행기', '문화사'
         ];
 
-        // 게임 상태 관리
         class BingoGame {
             constructor() {
+                // 게임 상태 변수
                 this.gameRoom = '';
                 this.gameMode = 'select';
                 this.gameState = 'waiting';
@@ -838,7 +468,37 @@
                 this.isSharedLink = false;
                 this.lastUpdate = Date.now();
                 
+                // UI 요소 캐싱
+                this.ui = {};
+                this.cacheDOMElements();
+                
                 this.init();
+            }
+
+            // DOM 요소를 한번만 찾아와서 변수에 저장 (성능 향상)
+            cacheDOMElements() {
+                const ids = [
+                    'loading', 'app', 'select-screen', 'admin-screen', 'player-screen',
+                    'connection', 'admin-connection', 'player-connection', 'share-game-btn',
+                    'room-code-display', 'admin-room-code', 'player-room-code', 'shared-notice',
+                    'admin-mode-btn', 'player-name-input', 'join-game-btn', 'refresh-btn',
+                    'total-players', 'called-topics', 'back-to-main', 'share-admin-btn',
+                    'change-password-btn', 'bingo-range', 'bingo-value', 'range-warning',
+                    'game-toggle', 'reset-game', 'call-topic', 'current-topic-card',
+                    'current-topic-name', 'admin-players', 'admin-topics', 'admin-condition',
+                    'admin-completed', 'topics-history', 'rank-count', 'admin-leaderboard',
+                    'player-title', 'player-back', 'my-lines', 'my-bingo-status', 'my-rank',
+                    'my-medal', 'my-condition', 'player-current-topic', 'player-topic-name',
+                    'player-bingo-card', 'custom-modal', 'modal-title', 'modal-text', 'modal-buttons',
+                    'password-modal', 'password-setup', 'password-verify', 'new-password',
+                    'confirm-password', 'verify-password', 'forgot-password', 'password-error',
+                    'password-confirm', 'password-cancel', 'share-modal', 'share-room-code',
+                    'copy-room', 'share-url', 'share-link', 'close-share'
+                ];
+                ids.forEach(id => {
+                    const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+                    this.ui[camelCaseId] = document.getElementById(id);
+                });
             }
 
             init() {
@@ -850,94 +510,105 @@
             }
 
             hideLoading() {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
+                this.ui.loading.classList.add('hidden');
+                this.ui.app.classList.remove('hidden');
             }
 
+            // 모든 이벤트 리스너를 한 곳에서 설정
             setupEventListeners() {
-                // 메인 버튼들
-                document.getElementById('admin-mode-btn').addEventListener('click', () => this.showPasswordModal());
-                document.getElementById('join-game-btn').addEventListener('click', () => this.joinAsPlayer());
-                document.getElementById('share-game-btn').addEventListener('click', () => this.showShareModal());
-                document.getElementById('refresh-btn').addEventListener('click', () => this.refreshGame());
+                this.ui.adminModeBtn.addEventListener('click', () => this.showPasswordModal());
+                this.ui.joinGameBtn.addEventListener('click', () => this.joinAsPlayer());
+                this.ui.shareGameBtn.addEventListener('click', () => this.showShareModal());
+                this.ui.refreshBtn.addEventListener('click', () => this.refreshGame());
                 
-                // 플레이어 이름 입력
-                const nameInput = document.getElementById('player-name-input');
-                nameInput.addEventListener('input', (e) => {
-                    document.getElementById('join-game-btn').disabled = !e.target.value.trim();
+                this.ui.playerNameInput.addEventListener('input', (e) => {
+                    this.ui.joinGameBtn.disabled = !e.target.value.trim();
                 });
-                nameInput.addEventListener('keypress', (e) => {
+                this.ui.playerNameInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && e.target.value.trim()) this.joinAsPlayer();
                 });
 
-                // 관리자 버튼들
-                document.getElementById('back-to-main').addEventListener('click', () => this.showScreen('select'));
-                document.getElementById('share-admin-btn').addEventListener('click', () => this.showShareModal());
-                document.getElementById('change-password-btn').addEventListener('click', () => this.changePassword());
-                document.getElementById('game-toggle').addEventListener('click', () => this.toggleGame());
-                document.getElementById('reset-game').addEventListener('click', () => this.resetGame());
-                document.getElementById('call-topic').addEventListener('click', () => this.callTopic());
+                this.ui.backToMain.addEventListener('click', () => this.showScreen('select'));
+                this.ui.shareAdminBtn.addEventListener('click', () => this.showShareModal());
+                this.ui.changePasswordBtn.addEventListener('click', () => this.changePassword());
+                this.ui.gameToggle.addEventListener('click', () => this.toggleGame());
+                this.ui.resetGame.addEventListener('click', () => this.resetGame());
+                this.ui.callTopic.addEventListener('click', () => this.callTopic());
 
-                // 플레이어 버튼들
-                document.getElementById('player-back').addEventListener('click', () => this.showScreen('select'));
-                document.getElementById('player-refresh').addEventListener('click', () => this.refreshGame());
+                this.ui.playerBack.addEventListener('click', () => this.showScreen('select'));
 
-                // 빙고 라인 설정
-                const rangeInput = document.getElementById('bingo-range');
-                rangeInput.addEventListener('input', (e) => {
-                    this.setRequiredLines(parseInt(e.target.value));
-                });
+                this.ui.bingoRange.addEventListener('input', (e) => this.setRequiredLines(parseInt(e.target.value)));
 
-                // 비밀번호 모달
-                document.getElementById('password-confirm').addEventListener('click', () => this.confirmPassword());
-                document.getElementById('password-cancel').addEventListener('click', () => this.hidePasswordModal());
-                document.getElementById('forgot-password').addEventListener('click', () => this.resetPassword());
+                this.ui.passwordConfirm.addEventListener('click', () => this.confirmPassword());
+                this.ui.passwordCancel.addEventListener('click', () => this.hidePasswordModal());
+                this.ui.forgotPassword.addEventListener('click', () => this.resetPassword());
 
-                // 비밀번호 입력 필드들
-                ['new-password', 'confirm-password', 'verify-password'].forEach(id => {
-                    const input = document.getElementById(id);
-                    input.addEventListener('input', (e) => {
+                ['newPassword', 'confirmPassword', 'verifyPassword'].forEach(id => {
+                    this.ui[id].addEventListener('input', (e) => {
                         e.target.value = e.target.value.replace(/[^0-9]/g, '');
                         this.validatePassword();
                     });
-                    input.addEventListener('keypress', (e) => {
+                    this.ui[id].addEventListener('keypress', (e) => {
                         if (e.key === 'Enter') this.confirmPassword();
                     });
                 });
 
-                // 공유 모달
-                document.getElementById('copy-room').addEventListener('click', () => this.copyText(this.gameRoom));
-                document.getElementById('share-link').addEventListener('click', () => this.shareLink());
-                document.getElementById('close-share').addEventListener('click', () => this.hideShareModal());
+                this.ui.copyRoom.addEventListener('click', () => this.copyText(this.gameRoom, '룸 코드'));
+                this.ui.shareLink.addEventListener('click', () => this.shareLink());
+                this.ui.closeShare.addEventListener('click', () => this.hideShareModal());
             }
 
+            // --- 맞춤형 모달 함수 ---
+            showAlert(title, text, onOk) {
+                this.ui.modalTitle.textContent = title;
+                this.ui.modalText.textContent = text;
+                this.ui.modalButtons.innerHTML = `<button id="modal-ok" class="btn btn-primary btn-full">확인</button>`;
+                this.ui.customModal.classList.add('visible');
+                
+                document.getElementById('modal-ok').onclick = () => {
+                    this.ui.customModal.classList.remove('visible');
+                    if (onOk) onOk();
+                };
+            }
+
+            showConfirm(title, text, onConfirm, onCancel) {
+                this.ui.modalTitle.textContent = title;
+                this.ui.modalText.textContent = text;
+                this.ui.modalButtons.innerHTML = `
+                    <button id="modal-confirm" class="btn btn-danger" style="flex:1;">확인</button>
+                    <button id="modal-cancel" class="btn btn-secondary" style="flex:1;">취소</button>
+                `;
+                this.ui.customModal.classList.add('visible');
+
+                document.getElementById('modal-confirm').onclick = () => {
+                    this.ui.customModal.classList.remove('visible');
+                    if (onConfirm) onConfirm();
+                };
+                document.getElementById('modal-cancel').onclick = () => {
+                    this.ui.customModal.classList.remove('visible');
+                    if (onCancel) onCancel();
+                };
+            }
+
+            // --- 상태 관리 ---
             loadGameState() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const roomId = urlParams.get('room');
-                const mode = urlParams.get('mode');
                 
                 if (roomId) {
                     this.gameRoom = roomId;
-                    if (mode === 'player') {
+                    if (urlParams.get('mode') === 'player') {
                         this.isSharedLink = true;
-                        document.getElementById('admin-mode-btn').classList.add('hidden');
-                        document.getElementById('shared-notice').classList.remove('hidden');
-                        document.getElementById('share-game-btn').classList.add('hidden');
-                        document.getElementById('usage-text').innerHTML = 
-                            '• 이미 설정된 게임에 참가자로 입장합니다<br>' +
-                            '• 이름을 입력하고 게임에 참여하세요<br>' +
-                            '• 관리자가 주제를 호출하면 자동 업데이트됩니다<br>' +
-                            '• 설정된 줄 수를 완성하면 빙고입니다';
+                        this.ui.adminModeBtn.classList.add('hidden');
+                        this.ui.sharedNotice.classList.remove('hidden');
+                        this.ui.shareGameBtn.classList.add('hidden');
                     }
-                    
-                    // 저장된 상태 로드
                     const saved = this.loadSavedState(roomId);
                     if (saved) this.restoreState(saved);
                 } else {
                     this.gameRoom = this.generateRoomId();
                     this.updateUrl();
                 }
-                
                 this.updateUI();
             }
 
@@ -946,10 +617,15 @@
             }
 
             updateUrl() {
-                const params = new URLSearchParams();
-                params.set('room', this.gameRoom);
-                if (this.isSharedLink) params.set('mode', 'player');
-                window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+                try {
+                    const params = new URLSearchParams();
+                    params.set('room', this.gameRoom);
+                    if (this.isSharedLink) params.set('mode', 'player');
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+                    window.history.replaceState({}, '', newUrl);
+                } catch (e) {
+                    console.warn("URL을 업데이트할 수 없습니다. (보안 제약 환경)", e.message);
+                }
             }
 
             loadSavedState(roomId) {
@@ -957,11 +633,12 @@
                     const saved = localStorage.getItem(`kdc-bingo-${roomId}`);
                     if (saved) {
                         const data = JSON.parse(saved);
+                        // 24시간 이상된 데이터는 삭제
                         if (Date.now() - data.lastUpdate < 24 * 60 * 60 * 1000) {
                             return data;
                         }
                     }
-                } catch (e) {}
+                } catch (e) { console.error("상태 로드 실패:", e); }
                 return null;
             }
 
@@ -976,15 +653,15 @@
                         lastUpdate: Date.now()
                     };
                     localStorage.setItem(`kdc-bingo-${this.gameRoom}`, JSON.stringify(state));
-                } catch (e) {}
+                } catch (e) { console.error("상태 저장 실패:", e); }
             }
 
             restoreState(saved) {
-                if (saved.calledTopics) this.calledTopics = saved.calledTopics;
-                if (saved.currentTopic) this.currentTopic = saved.currentTopic;
-                if (saved.gameState) this.gameState = saved.gameState;
-                if (saved.requiredBingoLines) this.requiredBingoLines = saved.requiredBingoLines;
-                if (saved.players) this.players = new Map(saved.players);
+                this.calledTopics = saved.calledTopics || [];
+                this.currentTopic = saved.currentTopic || '';
+                this.gameState = saved.gameState || 'waiting';
+                this.requiredBingoLines = saved.requiredBingoLines || 3;
+                this.players = new Map(saved.players || []);
                 this.lastUpdate = saved.lastUpdate || Date.now();
             }
 
@@ -1007,157 +684,152 @@
             checkConnection() {
                 setInterval(() => {
                     const online = navigator.onLine;
-                    document.querySelectorAll('[id$="connection"]').forEach(el => {
-                        el.className = `status-badge ${online ? 'status-online' : 'status-offline'}`;
-                        el.textContent = online ? '🌐 실시간 연결' : '📵 오프라인';
+                    [this.ui.connection, this.ui.adminConnection, this.ui.playerConnection].forEach(el => {
+                        if (el) {
+                            el.className = `status-badge ${online ? 'status-online' : 'status-offline'}`;
+                            el.textContent = online ? '🌐 실시간 연결' : '📵 오프라인';
+                        }
                     });
                 }, 3000);
             }
 
             showScreen(screen) {
-                ['select-screen', 'admin-screen', 'player-screen'].forEach(id => {
-                    document.getElementById(id).classList.add('hidden');
+                ['select', 'admin', 'player'].forEach(s => {
+                    this.ui[`${s}Screen`].classList.add('hidden');
                 });
-                document.getElementById(`${screen}-screen`).classList.remove('hidden');
+                this.ui[`${screen}Screen`].classList.remove('hidden');
                 this.gameMode = screen;
                 this.updateUI();
             }
 
-            // 비밀번호 관리
-            showPasswordModal() {
-                const hasPassword = this.hasPassword();
-                document.getElementById('password-setup').classList.toggle('hidden', hasPassword);
-                document.getElementById('password-verify').classList.toggle('hidden', !hasPassword);
+            // --- 비밀번호 관리 (SHA-256 해싱 사용) ---
+            async hashPassword(password) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password + this.gameRoom); // 솔트(salt)로 룸 ID 사용
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            async showPasswordModal() {
+                const hasPwd = await this.hasPassword();
+                this.ui.passwordSetup.classList.toggle('hidden', hasPwd);
+                this.ui.passwordVerify.classList.toggle('hidden', !hasPwd);
                 this.clearPasswordInputs();
-                document.getElementById('password-modal').classList.remove('hidden');
+                this.ui.passwordModal.classList.add('visible');
                 
-                if (hasPassword) {
-                    document.getElementById('verify-password').focus();
-                } else {
-                    document.getElementById('new-password').focus();
-                }
+                if (hasPwd) this.ui.verifyPassword.focus();
+                else this.ui.newPassword.focus();
             }
 
             hidePasswordModal() {
-                document.getElementById('password-modal').classList.add('hidden');
+                this.ui.passwordModal.classList.remove('visible');
                 this.clearPasswordInputs();
                 this.hidePasswordError();
             }
 
-            hasPassword() {
-                return localStorage.getItem(`admin-pwd-${this.gameRoom}`) !== null;
+            async hasPassword() {
+                return localStorage.getItem(`admin-pwd-hash-${this.gameRoom}`) !== null;
             }
 
-            savePassword(password) {
-                const hash = btoa(password + this.gameRoom);
-                localStorage.setItem(`admin-pwd-${this.gameRoom}`, hash);
+            async savePassword(password) {
+                const hash = await this.hashPassword(password);
+                localStorage.setItem(`admin-pwd-hash-${this.gameRoom}`, hash);
             }
 
-            verifyPassword(password) {
-                const stored = localStorage.getItem(`admin-pwd-${this.gameRoom}`);
-                const hash = btoa(password + this.gameRoom);
-                return stored === hash;
+            async verifyPassword(password) {
+                const storedHash = localStorage.getItem(`admin-pwd-hash-${this.gameRoom}`);
+                if (!storedHash) return false;
+                const inputHash = await this.hashPassword(password);
+                return storedHash === inputHash;
             }
 
-            confirmPassword() {
-                const hasPassword = this.hasPassword();
+            async confirmPassword() {
+                const hasPwd = await this.hasPassword();
                 
-                if (hasPassword) {
-                    const password = document.getElementById('verify-password').value;
-                    if (this.verifyPassword(password)) {
+                if (hasPwd) {
+                    const password = this.ui.verifyPassword.value;
+                    if (await this.verifyPassword(password)) {
                         this.hidePasswordModal();
                         this.showScreen('admin');
                     } else {
                         this.showPasswordError('비밀번호가 올바르지 않습니다');
                     }
                 } else {
-                    const newPwd = document.getElementById('new-password').value;
-                    const confirmPwd = document.getElementById('confirm-password').value;
+                    const newPwd = this.ui.newPassword.value;
+                    const confirmPwd = this.ui.confirmPassword.value;
                     
                     if (newPwd.length !== 4) {
                         this.showPasswordError('4자리 숫자를 입력해주세요');
                         return;
                     }
-                    
                     if (newPwd !== confirmPwd) {
                         this.showPasswordError('비밀번호가 일치하지 않습니다');
                         return;
                     }
                     
-                    this.savePassword(newPwd);
+                    await this.savePassword(newPwd);
                     this.hidePasswordModal();
                     this.showScreen('admin');
-                    alert('🔐 관리자 비밀번호가 설정되었습니다!');
+                    this.showAlert('🔐 설정 완료', '관리자 비밀번호가 설정되었습니다!');
                 }
             }
 
             validatePassword() {
-                const hasPassword = this.hasPassword();
-                const confirmBtn = document.getElementById('password-confirm');
-                
-                if (hasPassword) {
-                    const password = document.getElementById('verify-password').value;
-                    confirmBtn.disabled = password.length !== 4;
-                    confirmBtn.textContent = '🔓 로그인';
-                } else {
-                    const newPwd = document.getElementById('new-password').value;
-                    const confirmPwd = document.getElementById('confirm-password').value;
-                    const valid = newPwd.length === 4 && confirmPwd.length === 4;
-                    
-                    confirmBtn.disabled = !valid;
-                    confirmBtn.textContent = '🔐 비밀번호 설정';
-                    
-                    if (valid && newPwd !== confirmPwd) {
-                        this.showPasswordError('비밀번호가 일치하지 않습니다');
+                this.hasPassword().then(hasPwd => {
+                    const confirmBtn = this.ui.passwordConfirm;
+                    if (hasPwd) {
+                        const password = this.ui.verifyPassword.value;
+                        confirmBtn.disabled = password.length !== 4;
+                        confirmBtn.textContent = '🔓 로그인';
                     } else {
-                        this.hidePasswordError();
+                        const newPwd = this.ui.newPassword.value;
+                        const confirmPwd = this.ui.confirmPassword.value;
+                        const valid = newPwd.length === 4 && confirmPwd.length === 4;
+                        confirmBtn.disabled = !valid;
+                        confirmBtn.textContent = '🔐 비밀번호 설정';
+                        
+                        if (valid && newPwd !== confirmPwd) this.showPasswordError('비밀번호가 일치하지 않습니다');
+                        else this.hidePasswordError();
                     }
-                }
+                });
             }
 
             showPasswordError(msg) {
-                const errorEl = document.getElementById('password-error');
-                errorEl.textContent = `❌ ${msg}`;
-                errorEl.classList.remove('hidden');
+                this.ui.passwordError.textContent = `❌ ${msg}`;
+                this.ui.passwordError.classList.remove('hidden');
             }
 
-            hidePasswordError() {
-                document.getElementById('password-error').classList.add('hidden');
-            }
+            hidePasswordError() { this.ui.passwordError.classList.add('hidden'); }
 
             clearPasswordInputs() {
-                ['new-password', 'confirm-password', 'verify-password'].forEach(id => {
-                    document.getElementById(id).value = '';
-                });
+                ['newPassword', 'confirmPassword', 'verifyPassword'].forEach(id => { this.ui[id].value = ''; });
                 this.validatePassword();
             }
 
             changePassword() {
-                if (confirm('🔐 관리자 비밀번호를 변경하시겠습니까?')) {
-                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
+                this.showConfirm('🔐 비밀번호 변경', '관리자 비밀번호를 변경하시겠습니까? 현재 비밀번호는 삭제됩니다.', () => {
+                    localStorage.removeItem(`admin-pwd-hash-${this.gameRoom}`);
                     this.showPasswordModal();
-                }
+                });
             }
 
             resetPassword() {
-                if (confirm('🔄 비밀번호를 재설정하시겠습니까?')) {
-                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
+                this.showConfirm('🔄 비밀번호 재설정', '비밀번호를 재설정하시겠습니까?', () => {
+                    localStorage.removeItem(`admin-pwd-hash-${this.gameRoom}`);
                     this.hidePasswordModal();
                     this.showPasswordModal();
-                }
+                });
             }
 
-            // 공유 기능
+            // --- 공유 기능 ---
             showShareModal() {
-                document.getElementById('share-room-code').textContent = this.gameRoom;
-                document.getElementById('share-url').textContent = 
-                    `${window.location.origin}${window.location.pathname}?room=${this.gameRoom}&mode=player`;
-                document.getElementById('share-modal').classList.remove('hidden');
+                this.ui.shareRoomCode.textContent = this.gameRoom;
+                this.ui.shareUrl.textContent = `${window.location.origin}${window.location.pathname}?room=${this.gameRoom}&mode=player`;
+                this.ui.shareModal.classList.add('visible');
             }
 
-            hideShareModal() {
-                document.getElementById('share-modal').classList.add('hidden');
-            }
+            hideShareModal() { this.ui.shareModal.classList.remove('visible'); }
 
             shareLink() {
                 const url = `${window.location.origin}${window.location.pathname}?room=${this.gameRoom}&mode=player`;
@@ -1166,54 +838,30 @@
                         title: '📚 KDC 도서관 빙고 게임',
                         text: '함께 빙고 게임에 참여하세요!',
                         url: url
-                    }).catch(() => this.copyText(url));
+                    }).catch(() => this.copyText(url, '링크'));
                 } else {
-                    this.copyText(url);
+                    this.copyText(url, '링크');
                 }
             }
 
-            copyText(text) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert('🔗 클립보드에 복사되었습니다!');
-                    }).catch(() => this.fallbackCopy(text));
-                } else {
-                    this.fallbackCopy(text);
-                }
+            copyText(text, type) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showAlert('📋 복사 완료', `${type}가 클립보드에 복사되었습니다!`);
+                }).catch(() => {
+                    this.showAlert('⚠️ 복사 실패', '클립보드 복사에 실패했습니다. 수동으로 복사해주세요.');
+                });
             }
 
-            fallbackCopy(text) {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.select();
-                
-                try {
-                    if (document.execCommand('copy')) {
-                        alert('🔗 클립보드에 복사되었습니다!');
-                    } else {
-                        prompt('링크를 복사하세요:', text);
-                    }
-                } catch (e) {
-                    prompt('링크를 복사하세요:', text);
-                }
-                
-                document.body.removeChild(textArea);
-            }
-
-            // 게임 로직
+            // --- 게임 로직 ---
             joinAsPlayer() {
-                const name = document.getElementById('player-name-input').value.trim();
+                const name = this.ui.playerNameInput.value.trim();
                 if (!name) return;
                 
                 this.playerName = name;
                 this.playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
                 this.playerCard = this.generateBingoCard();
                 this.playerCard[12].marked = true; // 가운데 FREE
-                
-                // 이미 호출된 주제 마킹
+
                 this.calledTopics.forEach(topic => {
                     this.playerCard.forEach(cell => {
                         if (cell.topic === topic) cell.marked = true;
@@ -1234,41 +882,25 @@
             generateBingoCard() {
                 const shuffled = [...KDC_TOPICS].sort(() => Math.random() - 0.5);
                 return shuffled.slice(0, 25).map((topic, index) => ({
-                    id: index,
-                    topic,
-                    marked: false,
-                    isCenter: index === 12
+                    id: index, topic, marked: false, isCenter: index === 12
                 }));
             }
 
             checkBingo(card) {
-                const grid = [];
-                for (let i = 0; i < 5; i++) {
-                    grid.push(card.slice(i * 5, (i + 1) * 5));
-                }
-
+                const grid = Array.from({ length: 5 }, (_, i) => card.slice(i * 5, (i + 1) * 5));
                 let count = 0;
-                
-                // 가로줄
+                // 가로, 세로
                 for (let i = 0; i < 5; i++) {
                     if (grid[i].every(cell => cell.marked)) count++;
+                    if (grid.every(row => row[i].marked)) count++;
                 }
-                
-                // 세로줄
-                for (let j = 0; j < 5; j++) {
-                    if (grid.every(row => row[j].marked)) count++;
-                }
-                
                 // 대각선
                 if (grid.every((row, i) => row[i].marked)) count++;
                 if (grid.every((row, i) => row[4 - i].marked)) count++;
-                
                 return count;
             }
 
-            isBingoComplete(lines) {
-                return lines >= this.requiredBingoLines;
-            }
+            isBingoComplete(lines) { return lines >= this.requiredBingoLines; }
 
             toggleGame() {
                 this.gameState = this.gameState === 'playing' ? 'paused' : 'playing';
@@ -1277,7 +909,7 @@
             }
 
             resetGame() {
-                if (confirm('🔄 게임을 초기화하시겠습니까?')) {
+                this.showConfirm('🔄 게임 초기화', '정말로 게임을 초기화하시겠습니까? 모든 참가자 정보가 사라집니다.', () => {
                     this.calledTopics = [];
                     this.currentTopic = '';
                     this.gameState = 'waiting';
@@ -1285,19 +917,21 @@
                     this.requiredBingoLines = 3;
                     localStorage.removeItem(`kdc-bingo-${this.gameRoom}`);
                     this.updateUI();
-                }
+                });
             }
 
             callTopic() {
                 const uncalled = KDC_TOPICS.filter(topic => !this.calledTopics.includes(topic));
-                if (uncalled.length === 0) return;
+                if (uncalled.length === 0) {
+                    this.showAlert('🎉 종료', '모든 주제를 호출했습니다!');
+                    return;
+                }
 
                 const topic = uncalled[Math.floor(Math.random() * uncalled.length)];
                 this.currentTopic = topic;
                 this.calledTopics.push(topic);
                 this.lastUpdate = Date.now();
                 
-                // 모든 플레이어 카드 업데이트
                 this.players.forEach((player, id) => {
                     const updatedCard = player.card.map(cell => 
                         cell.topic === topic ? { ...cell, marked: true } : cell
@@ -1319,7 +953,6 @@
                     this.playerCard = this.playerCard.map(cell => 
                         this.calledTopics.includes(cell.topic) ? { ...cell, marked: true } : cell
                     );
-                    
                     if (this.players.has(this.playerId)) {
                         const player = this.players.get(this.playerId);
                         player.card = this.playerCard;
@@ -1342,54 +975,48 @@
             }
 
             getLeaderboard() {
-                return Array.from(this.players.entries())
-                    .map(([id, player]) => ({ id, ...player }))
+                return Array.from(this.players.values())
+                    .map(player => ({ ...player }))
                     .sort((a, b) => {
                         if (b.bingoLines !== a.bingoLines) return b.bingoLines - a.bingoLines;
-                        return a.joinTime - b.joinTime; // 같은 줄 수면 먼저 참여한 사람이 앞서
+                        return a.joinTime - b.joinTime;
                     });
             }
 
+            // --- UI 업데이트 ---
             updateUI() {
                 this.updateRoomInfo();
                 this.updateStats();
-                this.updateGameControls();
-                this.updateCurrentTopic();
-                this.updateLeaderboard();
-                this.updateBingoCard();
-                this.updatePlayerStatus();
+                if (this.gameMode === 'admin') this.updateAdminUI();
+                if (this.gameMode === 'player') this.updatePlayerUI();
             }
 
             updateRoomInfo() {
-                document.querySelectorAll('[id*="room-code"]').forEach(el => {
-                    el.textContent = this.gameRoom;
+                [this.ui.roomCodeDisplay, this.ui.adminRoomCode, this.ui.playerRoomCode].forEach(el => {
+                    if(el) el.textContent = this.gameRoom;
                 });
             }
 
             updateStats() {
                 const playerCount = this.players.size;
                 const topicCount = this.calledTopics.length;
-                
-                document.getElementById('total-players').textContent = playerCount;
-                document.getElementById('called-topics').textContent = topicCount;
-                document.getElementById('admin-players').textContent = playerCount;
-                document.getElementById('admin-topics').textContent = topicCount;
-                document.getElementById('admin-condition').textContent = this.requiredBingoLines;
-                document.getElementById('admin-completed').textContent = 
-                    this.getLeaderboard().filter(p => this.isBingoComplete(p.bingoLines)).length;
-                document.getElementById('rank-count').textContent = playerCount;
+                this.ui.totalPlayers.textContent = playerCount;
+                this.ui.calledTopics.textContent = topicCount;
             }
 
-            updateGameControls() {
-                if (this.gameMode !== 'admin') return;
+            updateAdminUI() {
+                const playerCount = this.players.size;
+                const topicCount = this.calledTopics.length;
+                this.ui.adminPlayers.textContent = playerCount;
+                this.ui.adminTopics.textContent = topicCount;
+                this.ui.adminCondition.textContent = this.requiredBingoLines;
+                
+                const leaderboard = this.getLeaderboard();
+                this.ui.adminCompleted.textContent = leaderboard.filter(p => this.isBingoComplete(p.bingoLines)).length;
+                this.ui.rankCount.textContent = playerCount;
 
-                const toggleBtn = document.getElementById('game-toggle');
-                const callBtn = document.getElementById('call-topic');
-                const rangeInput = document.getElementById('bingo-range');
-                const rangeValue = document.getElementById('bingo-value');
-                const rangeWarning = document.getElementById('range-warning');
-
-                // 게임 토글 버튼
+                // Game Controls
+                const toggleBtn = this.ui.gameToggle;
                 if (this.gameState === 'playing') {
                     toggleBtn.textContent = '⏸️ 일시정지';
                     toggleBtn.className = 'btn btn-warning';
@@ -1397,44 +1024,59 @@
                     toggleBtn.textContent = '▶️ 게임 시작';
                     toggleBtn.className = 'btn btn-success';
                 }
-
-                // 주제 호출 버튼
                 const remaining = KDC_TOPICS.length - this.calledTopics.length;
-                callBtn.textContent = `📢 다음 주제 호출 (${remaining}개 남음)`;
-                callBtn.disabled = this.gameState !== 'playing' || remaining === 0;
-
-                // 빙고 라인 설정
-                rangeInput.value = this.requiredBingoLines;
-                rangeValue.textContent = this.requiredBingoLines;
+                this.ui.callTopic.textContent = `📢 다음 주제 호출 (${remaining}개 남음)`;
+                this.ui.callTopic.disabled = this.gameState !== 'playing' || remaining === 0;
                 
+                this.ui.bingoRange.value = this.requiredBingoLines;
+                this.ui.bingoValue.textContent = this.requiredBingoLines;
                 const gameActive = this.gameState === 'playing' && this.calledTopics.length > 0;
-                rangeInput.disabled = gameActive;
-                rangeWarning.classList.toggle('hidden', !gameActive);
+                this.ui.bingoRange.disabled = gameActive;
+                this.ui.rangeWarning.classList.toggle('hidden', !gameActive);
+
+                this.updateCurrentTopic('admin');
+                this.updateLeaderboard(leaderboard, 'admin');
+                this.updateTopicsHistory();
             }
 
-            updateCurrentTopic() {
-                const displays = [
-                    { card: 'current-topic-card', name: 'current-topic-name', time: 'current-topic-time' },
-                    { card: 'player-current-topic', name: 'player-topic-name', time: 'player-topic-time' }
-                ];
+            updatePlayerUI() {
+                this.ui.playerTitle.textContent = `🎯 ${this.playerName}님의 빙고`;
+                this.ui.myCondition.textContent = this.requiredBingoLines;
 
-                displays.forEach(({ card, name, time }) => {
-                    const cardEl = document.getElementById(card);
-                    if (this.currentTopic) {
-                        document.getElementById(name).textContent = this.currentTopic;
-                        document.getElementById(time).textContent = '방금 호출됨';
-                        cardEl.classList.remove('hidden');
-                    } else {
-                        cardEl.classList.add('hidden');
-                    }
-                });
+                if (this.playerId && this.players.has(this.playerId)) {
+                    const player = this.players.get(this.playerId);
+                    const leaderboard = this.getLeaderboard();
+                    const rank = leaderboard.findIndex(p => p.name === this.playerName) + 1;
+                    const isComplete = this.isBingoComplete(player.bingoLines);
 
-                // 주제 히스토리
-                const historyEl = document.getElementById('topics-history');
-                if (this.calledTopics.length === 0) {
-                    historyEl.innerHTML = '<div style="text-align: center; color: #64748b; padding: 1rem;">아직 호출된 주제가 없습니다</div>';
+                    this.ui.myLines.textContent = player.bingoLines;
+                    this.ui.myLines.style.color = isComplete ? 'var(--danger-color)' : 'var(--primary-color)';
+                    this.ui.myRank.textContent = rank ? `#${rank}` : '#-';
+                    this.ui.myBingoStatus.classList.toggle('hidden', !isComplete);
+                    
+                    const medals = ['👑', '🥈', '🥉'];
+                    this.ui.myMedal.textContent = (rank > 0 && rank <= 3) ? medals[rank - 1] : '';
+                }
+                this.updateCurrentTopic('player');
+                this.updateBingoCard();
+            }
+
+            updateCurrentTopic(mode) {
+                const card = this.ui[mode === 'admin' ? 'currentTopicCard' : 'playerCurrentTopic'];
+                const name = this.ui[mode === 'admin' ? 'currentTopicName' : 'playerTopicName'];
+                if (this.currentTopic) {
+                    name.textContent = this.currentTopic;
+                    card.classList.remove('hidden');
                 } else {
-                    historyEl.innerHTML = [...this.calledTopics].reverse().slice(0, 10).map((topic, index) => 
+                    card.classList.add('hidden');
+                }
+            }
+
+            updateTopicsHistory() {
+                if (this.calledTopics.length === 0) {
+                    this.ui.topicsHistory.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 1rem;">호출된 주제가 없습니다</div>';
+                } else {
+                    this.ui.topicsHistory.innerHTML = [...this.calledTopics].reverse().slice(0, 10).map((topic, index) => 
                         `<div style="padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
                             <span>${topic}</span>
                             <span style="color: #94a3b8;">#${this.calledTopics.length - index}</span>
@@ -1443,110 +1085,47 @@
                 }
             }
 
-            updateLeaderboard() {
-                const leaderboard = this.getLeaderboard();
-                const containers = ['admin-leaderboard', 'player-leaderboard'];
-
-                containers.forEach(containerId => {
-                    const container = document.getElementById(containerId);
-                    if (!container) return;
-
-                    if (leaderboard.length === 0) {
-                        container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">
-                            👥 ${containerId.includes('player') ? '다른 참가자가' : '참가자가'} 없습니다
-                        </div>`;
-                        return;
-                    }
-
-                    container.innerHTML = leaderboard.map((player, index) => {
-                        const isCurrentPlayer = player.id === this.playerId;
-                        const isComplete = this.isBingoComplete(player.bingoLines);
-                        
-                        let rankClass = 'rank-other';
-                        let emoji = '';
-                        let itemClass = 'player-item';
-                        
-                        if (index === 0) {
-                            rankClass = 'rank-1';
-                            emoji = '👑';
-                        } else if (index === 1) {
-                            rankClass = 'rank-2';
-                            emoji = '🥈';
-                        } else if (index === 2) {
-                            rankClass = 'rank-3';
-                            emoji = '🥉';
-                        }
-                        
-                        if (isCurrentPlayer) itemClass += ' player-current';
-
-                        return `
-                            <div class="${itemClass}">
-                                <div class="player-info">
-                                    <div class="player-rank ${rankClass}">${index + 1}</div>
-                                    <div>
-                                        <div style="font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
-                                            ${player.name}
-                                            ${isCurrentPlayer ? '<span style="color: #10b981;">👤</span>' : ''}
-                                        </div>
-                                        <div style="font-size: 0.875rem; color: #64748b;">
-                                            ${player.bingoLines}줄 완성
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="text-align: right;">
-                                    ${emoji ? `<div style="font-size: 1.25rem; margin-bottom: 0.25rem;">${emoji}</div>` : ''}
-                                    ${isComplete ? '<div class="bingo-badge">✅ BINGO!</div>' : ''}
+            updateLeaderboard(leaderboard, mode) {
+                const container = this.ui.adminLeaderboard;
+                if (leaderboard.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-light);">👥 참가자가 없습니다</div>`;
+                    return;
+                }
+                container.innerHTML = leaderboard.map((player, index) => {
+                    const rank = index + 1;
+                    const isComplete = this.isBingoComplete(player.bingoLines);
+                    const medals = { 1: '👑', 2: '🥈', 3: '🥉' };
+                    const rankClasses = { 1: 'rank-1', 2: 'rank-2', 3: 'rank-3' };
+                    return `
+                        <div class="player-item">
+                            <div class="player-info">
+                                <div class="player-rank ${rankClasses[rank] || 'rank-other'}">${rank}</div>
+                                <div>
+                                    <div style="font-weight: 600;">${player.name}</div>
+                                    <div style="font-size: 0.875rem; color: var(--text-light);">${player.bingoLines}줄 완성</div>
                                 </div>
                             </div>
-                        `;
-                    }).join('');
-                });
-            }
-
-            updateBingoCard() {
-                if (this.gameMode !== 'player' || !this.playerCard.length) return;
-
-                const container = document.getElementById('player-bingo-card');
-                container.innerHTML = this.playerCard.map(cell => {
-                    let cellClass = 'bingo-cell';
-                    let content = cell.topic;
-                    
-                    if (cell.isCenter) {
-                        cellClass += ' center';
-                        content = '<div style="font-size: 0.875rem;">⭐</div><div style="font-size: 0.625rem;">FREE</div>';
-                    } else if (cell.marked) {
-                        cellClass += ' marked';
-                    }
-                    
-                    return `<div class="${cellClass}">${content}</div>`;
+                            <div style="text-align: right;">
+                                ${medals[rank] ? `<div style="font-size: 1.25rem; margin-bottom: 0.25rem;">${medals[rank]}</div>` : ''}
+                                ${isComplete ? '<div class="bingo-badge">✅ BINGO!</div>' : ''}
+                            </div>
+                        </div>`;
                 }).join('');
             }
 
-            updatePlayerStatus() {
-                if (this.gameMode !== 'player') return;
-
-                document.getElementById('player-title').textContent = `🎯 ${this.playerName}님의 빙고`;
-                document.getElementById('my-condition').textContent = this.requiredBingoLines;
-                document.getElementById('my-progress').textContent = `(${this.calledTopics.length}개 호출)`;
-
-                if (this.playerId && this.players.has(this.playerId)) {
-                    const player = this.players.get(this.playerId);
-                    const leaderboard = this.getLeaderboard();
-                    const rank = leaderboard.findIndex(p => p.id === this.playerId) + 1;
-                    const isComplete = this.isBingoComplete(player.bingoLines);
-
-                    document.getElementById('my-lines').textContent = player.bingoLines;
-                    document.getElementById('my-lines').style.color = isComplete ? '#ef4444' : '#3b82f6';
-                    document.getElementById('my-rank').textContent = rank ? `#${rank}` : '#-';
-                    
-                    document.getElementById('my-bingo-status').classList.toggle('hidden', !isComplete);
-                    
-                    const medal = document.getElementById('my-medal');
-                    if (rank === 1) medal.textContent = '👑';
-                    else if (rank === 2) medal.textContent = '🥈';
-                    else if (rank === 3) medal.textContent = '🥉';
-                    else medal.textContent = '';
-                }
+            updateBingoCard() {
+                if (!this.playerCard.length) return;
+                this.ui.playerBingoCard.innerHTML = this.playerCard.map(cell => {
+                    let cellClass = 'bingo-cell';
+                    let content = cell.topic;
+                    if (cell.isCenter) {
+                        cellClass += ' center';
+                        content = '<div style="font-size: 1.25rem;">⭐</div><div style="font-size: 0.75rem;">FREE</div>';
+                    } else if (cell.marked) {
+                        cellClass += ' marked';
+                    }
+                    return `<div class="${cellClass}">${content}</div>`;
+                }).join('');
             }
         }
 
