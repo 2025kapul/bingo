@@ -468,6 +468,11 @@
                 this.isSharedLink = false;
                 this.lastUpdate = Date.now();
                 
+                // 효과음 관련
+                this.audioCtx = null;
+                this.prevPlayerCount = 0;
+                this.myPrevBingoLines = 0;
+
                 // UI 요소 캐싱
                 this.ui = {};
                 this.cacheDOMElements();
@@ -516,6 +521,18 @@
 
             // 모든 이벤트 리스너를 한 곳에서 설정
             setupEventListeners() {
+                const buttons = [
+                    this.ui.adminModeBtn, this.ui.joinGameBtn, this.ui.shareGameBtn,
+                    this.ui.refreshBtn, this.ui.backToMain, this.ui.shareAdminBtn,
+                    this.ui.changePasswordBtn, this.ui.gameToggle, this.ui.resetGame,
+                    this.ui.callTopic, this.ui.playerBack, this.ui.passwordConfirm,
+                    this.ui.passwordCancel, this.ui.forgotPassword, this.ui.copyRoom,
+                    this.ui.shareLink, this.ui.closeShare
+                ];
+                buttons.forEach(btn => {
+                    if (btn) btn.addEventListener('click', () => this.playSound('click'));
+                });
+
                 this.ui.adminModeBtn.addEventListener('click', () => this.showPasswordModal());
                 this.ui.joinGameBtn.addEventListener('click', () => this.joinAsPlayer());
                 this.ui.shareGameBtn.addEventListener('click', () => this.showShareModal());
@@ -558,6 +575,69 @@
                 this.ui.closeShare.addEventListener('click', () => this.hideShareModal());
             }
 
+            // --- 사운드 처리 ---
+            initAudio() {
+                if (this.audioCtx) return;
+                try {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn("Web Audio API is not supported in this browser.");
+                }
+            }
+
+            playSound(type) {
+                if (!this.audioCtx) return;
+
+                const now = this.audioCtx.currentTime;
+                const oscillator = this.audioCtx.createOscillator();
+                const gainNode = this.audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioCtx.destination);
+                gainNode.gain.setValueAtTime(0, now);
+
+                switch (type) {
+                    case 'click':
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(600, now);
+                        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                        gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
+                        break;
+                    case 'join':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(523.25, now);
+                        gainNode.gain.linearRampToValueAtTime(0.4, now + 0.01);
+                        oscillator.frequency.setValueAtTime(659.25, now + 0.1);
+                        gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                        break;
+                    case 'line':
+                         oscillator.type = 'sine';
+                         oscillator.frequency.setValueAtTime(880, now);
+                         gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                         gainNode.gain.linearRampToValueAtTime(0, now + 0.15);
+                        break;
+                    case 'bingo':
+                        ['G5', 'A5', 'B5', 'C6'].forEach((note, i) => {
+                            const frequencies = { G5: 783.99, A5: 880.00, B5: 987.77, C6: 1046.50 };
+                            const freq = frequencies[note];
+                            const time = now + i * 0.1;
+                            const osc = this.audioCtx.createOscillator();
+                            const gn = this.audioCtx.createGain();
+                            osc.type = 'sine';
+                            osc.connect(gn);
+                            gn.connect(this.audioCtx.destination);
+                            osc.frequency.setValueAtTime(freq, time);
+                            gn.gain.setValueAtTime(0.3, time);
+                            gn.gain.exponentialRampToValueAtTime(0.0001, time + 0.2);
+                            osc.start(time);
+                            osc.stop(time + 0.2);
+                        });
+                        return; // 커스텀 로직이므로 여기서 종료
+                }
+                
+                oscillator.start(now);
+                oscillator.stop(now + 0.2);
+            }
+
             // --- 맞춤형 모달 함수 ---
             showAlert(title, text, onOk) {
                 this.ui.modalTitle.textContent = title;
@@ -566,6 +646,7 @@
                 this.ui.customModal.classList.add('visible');
                 
                 document.getElementById('modal-ok').onclick = () => {
+                    this.playSound('click');
                     this.ui.customModal.classList.remove('visible');
                     if (onOk) onOk();
                 };
@@ -581,10 +662,12 @@
                 this.ui.customModal.classList.add('visible');
 
                 document.getElementById('modal-confirm').onclick = () => {
+                    this.playSound('click');
                     this.ui.customModal.classList.remove('visible');
                     if (onConfirm) onConfirm();
                 };
                 document.getElementById('modal-cancel').onclick = () => {
+                    this.playSound('click');
                     this.ui.customModal.classList.remove('visible');
                     if (onCancel) onCancel();
                 };
@@ -609,6 +692,7 @@
                     this.gameRoom = this.generateRoomId();
                     this.updateUrl();
                 }
+                this.prevPlayerCount = this.players.size;
                 this.updateUI();
             }
 
@@ -633,7 +717,6 @@
                     const saved = localStorage.getItem(`kdc-bingo-${roomId}`);
                     if (saved) {
                         const data = JSON.parse(saved);
-                        // 24시간 이상된 데이터는 삭제
                         if (Date.now() - data.lastUpdate < 24 * 60 * 60 * 1000) {
                             return data;
                         }
@@ -667,7 +750,6 @@
 
             startSync() {
                 setInterval(() => {
-                    this.saveState();
                     this.loadRemoteState();
                     this.updateUI();
                 }, 2000);
@@ -712,6 +794,7 @@
             }
 
             async showPasswordModal() {
+                this.initAudio();
                 const hasPwd = await this.hasPassword();
                 this.ui.passwordSetup.classList.toggle('hidden', hasPwd);
                 this.ui.passwordVerify.classList.toggle('hidden', !hasPwd);
@@ -745,6 +828,7 @@
             }
 
             async confirmPassword() {
+                this.initAudio();
                 const hasPwd = await this.hasPassword();
                 
                 if (hasPwd) {
@@ -854,6 +938,7 @@
 
             // --- 게임 로직 ---
             joinAsPlayer() {
+                this.initAudio();
                 const name = this.ui.playerNameInput.value.trim();
                 if (!name) return;
                 
@@ -869,6 +954,7 @@
                 });
 
                 this.players.set(this.playerId, {
+                    id: this.playerId,
                     name: this.playerName,
                     card: this.playerCard,
                     bingoLines: this.checkBingo(this.playerCard),
@@ -915,7 +1001,7 @@
                     this.gameState = 'waiting';
                     this.players.clear();
                     this.requiredBingoLines = 3;
-                    localStorage.removeItem(`kdc-bingo-${this.gameRoom}`);
+                    this.saveState(); // 초기화된 상태를 저장
                     this.updateUI();
                 });
             }
@@ -930,7 +1016,6 @@
                 const topic = uncalled[Math.floor(Math.random() * uncalled.length)];
                 this.currentTopic = topic;
                 this.calledTopics.push(topic);
-                this.lastUpdate = Date.now();
                 
                 this.players.forEach((player, id) => {
                     const updatedCard = player.card.map(cell => 
@@ -976,7 +1061,6 @@
 
             getLeaderboard() {
                 return Array.from(this.players.values())
-                    .map(player => ({ ...player }))
                     .sort((a, b) => {
                         if (b.bingoLines !== a.bingoLines) return b.bingoLines - a.bingoLines;
                         return a.joinTime - b.joinTime;
@@ -1006,6 +1090,11 @@
 
             updateAdminUI() {
                 const playerCount = this.players.size;
+                if (playerCount > this.prevPlayerCount) {
+                    this.playSound('join');
+                }
+                this.prevPlayerCount = playerCount;
+
                 const topicCount = this.calledTopics.length;
                 this.ui.adminPlayers.textContent = playerCount;
                 this.ui.adminTopics.textContent = topicCount;
@@ -1019,10 +1108,10 @@
                 const toggleBtn = this.ui.gameToggle;
                 if (this.gameState === 'playing') {
                     toggleBtn.textContent = '⏸️ 일시정지';
-                    toggleBtn.className = 'btn btn-warning';
+                    toggleBtn.className = 'btn btn-full btn-warning';
                 } else {
                     toggleBtn.textContent = '▶️ 게임 시작';
-                    toggleBtn.className = 'btn btn-success';
+                    toggleBtn.className = 'btn btn-full btn-success';
                 }
                 const remaining = KDC_TOPICS.length - this.calledTopics.length;
                 this.ui.callTopic.textContent = `📢 다음 주제 호출 (${remaining}개 남음)`;
@@ -1035,7 +1124,7 @@
                 this.ui.rangeWarning.classList.toggle('hidden', !gameActive);
 
                 this.updateCurrentTopic('admin');
-                this.updateLeaderboard(leaderboard, 'admin');
+                this.updateLeaderboard(leaderboard);
                 this.updateTopicsHistory();
             }
 
@@ -1046,13 +1135,25 @@
                 if (this.playerId && this.players.has(this.playerId)) {
                     const player = this.players.get(this.playerId);
                     const leaderboard = this.getLeaderboard();
-                    const rank = leaderboard.findIndex(p => p.name === this.playerName) + 1;
-                    const isComplete = this.isBingoComplete(player.bingoLines);
+                    const rank = leaderboard.findIndex(p => p.id === this.playerId) + 1;
+                    
+                    const newBingoLines = player.bingoLines;
+                    const isNowComplete = this.isBingoComplete(newBingoLines);
+                    const wasComplete = this.isBingoComplete(this.myPrevBingoLines);
 
-                    this.ui.myLines.textContent = player.bingoLines;
-                    this.ui.myLines.style.color = isComplete ? 'var(--danger-color)' : 'var(--primary-color)';
+                    if (newBingoLines > this.myPrevBingoLines) {
+                        if (isNowComplete && !wasComplete) {
+                            this.playSound('bingo');
+                        } else {
+                            this.playSound('line');
+                        }
+                    }
+                    this.myPrevBingoLines = newBingoLines;
+
+                    this.ui.myLines.textContent = newBingoLines;
+                    this.ui.myLines.style.color = isNowComplete ? 'var(--danger-color)' : 'var(--primary-color)';
                     this.ui.myRank.textContent = rank ? `#${rank}` : '#-';
-                    this.ui.myBingoStatus.classList.toggle('hidden', !isComplete);
+                    this.ui.myBingoStatus.classList.toggle('hidden', !isNowComplete);
                     
                     const medals = ['👑', '🥈', '🥉'];
                     this.ui.myMedal.textContent = (rank > 0 && rank <= 3) ? medals[rank - 1] : '';
@@ -1085,7 +1186,7 @@
                 }
             }
 
-            updateLeaderboard(leaderboard, mode) {
+            updateLeaderboard(leaderboard) {
                 const container = this.ui.adminLeaderboard;
                 if (leaderboard.length === 0) {
                     container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-light);">👥 참가자가 없습니다</div>`;
@@ -1093,11 +1194,12 @@
                 }
                 container.innerHTML = leaderboard.map((player, index) => {
                     const rank = index + 1;
+                    const isCurrentPlayer = player.id === this.playerId;
                     const isComplete = this.isBingoComplete(player.bingoLines);
                     const medals = { 1: '👑', 2: '🥈', 3: '🥉' };
                     const rankClasses = { 1: 'rank-1', 2: 'rank-2', 3: 'rank-3' };
                     return `
-                        <div class="player-item">
+                        <div class="player-item ${isCurrentPlayer ? 'player-current' : ''}">
                             <div class="player-info">
                                 <div class="player-rank ${rankClasses[rank] || 'rank-other'}">${rank}</div>
                                 <div>
