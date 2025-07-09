@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="POSTECH 워크숍 만찬용 모바일 빙고게임">
+  <title>모바일 빙고게임</title>
+  <style>
+    /* CSS 변수 설정 */
+    :root {
+      --postech-red: #C0001A;
+      --postech-green: #009E60;
+      --bg-light: #F5F5F5;
+      --text-dark: #333333;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    /* 기본 리셋 */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: var(--bg-light); color: var(--text-dark); }
+    /* 화면 공통 스타일 */
+    .screen { display: none; padding: 1rem; height: 100%; overflow-y: auto; }
+    .screen.active { display: block; }
+    h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+    p { margin: 0.5rem 0; }
+    /* 버튼 스타일 */
+    .btn { display: inline-block; text-align: center; padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 500; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.1s, background-color 0.2s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--postech-red); color: #fff; }
+    .btn-secondary { background: var(--postech-green); color: #fff; }
+    /* 입력 필드 */
+    input[type="text"], input[type="password"] { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #ccc; border-radius: var(--radius); font-size: 1rem; }
+    input:focus { outline: 2px solid var(--postech-red); }
+    /* 로딩 스피너 */
+    .spinner { display: none; width: 2rem; height: 2rem; border: 4px solid var(--bg-light); border-top-color: var(--postech-red); border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* 빙고판 그리드 */
+    .bingo-grid { display: grid; gap: 4px; margin: 1rem 0; }
+    .bingo-cell { background: #fff; border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; padding: 0.5rem; font-size: 0.85rem; border-radius: var(--radius); transition: background-color 0.2s; }
+    .bingo-cell.checked { background: var(--postech-green); color: #fff; }
+    /* 랭킹 배너 */
+    .ranking-banner { background: var(--postech-red); color: #fff; padding: 0.5rem; text-align: center; font-size: 1rem; font-weight: bold; }
+    /* 링크 스타일 */
+    a { color: var(--postech-red); word-break: break-all; }
+    /* 반응형 폰트 */
+    @media (min-width: 400px) { body { font-size: 1.1rem; } }
+  </style>
+</head>
+<body>
+  <!-- 로딩 스피너 -->
+  <div id="spinner" class="spinner"></div>
+
+  <!-- 관리자 로그인 화면 -->
+  <section id="screen-admin-login" class="screen active">
+    <h2>관리자 로그인</h2>
+    <input type="password" id="admin-password" placeholder="비밀번호 입력" />
+    <button class="btn btn-primary" id="btn-admin-login">로그인</button>
+    <p id="admin-login-error" style="color:red;"></p>
+  </section>
+
+  <!-- 관리자 설정 화면 -->
+  <section id="screen-admin-setup" class="screen">
+    <h2>게임 설정</h2>
+    <label for="config-size">빙고 크기 (3~5)</label>
+    <input type="text" id="config-size" value="5" />
+    <label for="config-winCount">빙고 줄수 (1~2)</label>
+    <input type="text" id="config-winCount" value="1" />
+    <button class="btn btn-secondary" id="btn-save-config">저장</button>
+    <button class="btn btn-primary" id="btn-create-game">게임 생성</button>
+    <p id="setup-message"></p>
+  </section>
+
+  <!-- 참가 화면 -->
+  <section id="screen-join" class="screen">
+    <h2>빙고게임 참가</h2>
+    <input type="text" id="user-nickname" placeholder="닉네임 입력 (1~20자)" />
+    <button class="btn btn-primary" id="btn-join">참가하기</button>
+    <p id="join-error" style="color:red;"></p>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section id="screen-game" class="screen">
+    <div class="ranking-banner" id="current-ranking">순위: --</div>
+    <h2>빙고판</h2>
+    <div id="bingo-grid" class="bingo-grid"></div>
+    <p>빙고 달성 시 자동 인증됩니다!</p>
+  </section>
+
+  <!-- 결과 화면 -->
+  <section id="screen-result" class="screen">
+    <h2>🎉 빙고 달성! 🎉</h2>
+    <p id="result-message"></p>
+    <button class="btn btn-primary" id="btn-continue">계속하기</button>
+  </section>
+
+  <script>
+    // API 요청 헬퍼
+    async function apiRequest(path, options = {}) {
+      const spinner = document.getElementById('spinner');
+      spinner.style.display = 'block';
+      try {
+        const res = await fetch((window.BASE_URL||'') + path, options);
+        const data = await res.json();
+        spinner.style.display = 'none';
+        return data;
+      } catch (e) {
+        spinner.style.display = 'none';
+        alert('통신 오류가 발생했습니다. 다시 시도해주세요.');
+        console.error(e);
+      }
+    }
+
+    // 화면 전환
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // 관리자 로그인
+    document.getElementById('btn-admin-login').onclick = async () => {
+      const pwd = document.getElementById('admin-password').value.trim();
+      if (!pwd) return document.getElementById('admin-login-error').innerText = '비밀번호를 입력하세요.';
+      const data = await apiRequest('/api/admin/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pwd}) });
+      if (data.token) {
+        localStorage.setItem('adminToken', data.token);
+        showScreen('screen-admin-setup');
+      } else document.getElementById('admin-login-error').innerText = data.error || '로그인 실패';
+    };
+
+    // 설정 저장
+    document.getElementById('btn-save-config').onclick = async () => {
+      const size = parseInt(document.getElementById('config-size').value);
+      const winCount = parseInt(document.getElementById('config-winCount').value);
+      const token = localStorage.getItem('adminToken');
+      const gameId = localStorage.getItem('gameId');
+      const data = await apiRequest(`/api/admin/game/${gameId}/config`, { method: 'PUT', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token}, body: JSON.stringify({size, winCount}) });
+      document.getElementById('setup-message').innerText = data.error || '설정 저장 완료';
+    };
+
+    // 게임 생성
+    document.getElementById('btn-create-game').onclick = async () => {
+      const token = localStorage.getItem('adminToken');
+      const data = await apiRequest('/api/admin/game', { method: 'POST', headers: {'Authorization': 'Bearer ' + token} });
+      if (data.gameId) {
+        localStorage.setItem('gameId', data.gameId);
+        document.getElementById('setup-message').innerHTML = `참가 URL: <a href="${data.joinUrl}" target="_blank">${data.joinUrl}</a>`;
+        showScreen('screen-join');
+      }
+    };
+
+    // 참가
+    document.getElementById('btn-join').onclick = async () => {
+      const nick = document.getElementById('user-nickname').value.trim();
+      if (!nick || nick.length > 20) return document.getElementById('join-error').innerText = '유효한 닉네임을 입력하세요.';
+      const gameId = localStorage.getItem('gameId');
+      const data = await apiRequest('/api/user/join', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({gameId, nickname: nick}) });
+      if (data.userId) {
+        localStorage.setItem('userId', data.userId);
+        renderBingoCard(data.card);
+        showScreen('screen-game');
+      } else document.getElementById('join-error').innerText = data.error;
+    };
+
+    // 빙고판 렌더링
+    function renderBingoCard(card) {
+      const grid = document.getElementById('bingo-grid');
+      grid.style.gridTemplateColumns = `repeat(${card.length}, 1fr)`;
+      grid.innerHTML = ''; card.flat().forEach(val => {
+        const cell = document.createElement('div'); cell.className = 'bingo-cell'; cell.innerText = val;
+        cell.onclick = () => handleCellClick(cell, val);
+        grid.appendChild(cell);
+      });
+    }
+
+    // 셀 클릭
+    async function handleCellClick(cell, value) {
+      if (cell.classList.contains('checked')) return;
+      const gameId = localStorage.getItem('gameId'), userId = localStorage.getItem('userId');
+      const data = await apiRequest(`/api/game/${gameId}/user/${userId}/check`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({value}) });
+      if (data.checkedCells) { cell.classList.add('checked'); checkBingo(); }
+    }
+
+    // 빙고 인증
+    async function checkBingo() {
+      const gameId = localStorage.getItem('gameId'), userId = localStorage.getItem('userId');
+      const data = await apiRequest(`/api/game/${gameId}/user/${userId}/bingo`, { method: 'POST' });
+      if (data.isBingo) {
+        document.getElementById('result-message').innerText = `순위: ${data.rank} 위!`;
+        showScreen('screen-result');
+      } else updateRanking();
+    }
+
+    // 순위 업데이트
+    async function updateRanking() {
+      const gameId = localStorage.getItem('gameId');
+      const data = await apiRequest(`/api/game/${gameId}/ranking?limit=1`);
+      if (data.ranking && data.ranking.length) document.getElementById('current
