@@ -63,10 +63,8 @@
         .title {
             font-size: 2.75rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #818cf8, #fbcfe8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             margin-bottom: 0.5rem;
         }
 
@@ -167,15 +165,15 @@
             justify-content: center;
             background: white;
             border-radius: 0.375rem;
-            font-size: 0.75rem; /* 가독성 향상 */
+            font-size: 0.75rem;
             font-weight: 600;
             text-align: center;
             padding: 0.25rem;
             position: relative;
             transition: all 0.3s ease;
             min-height: 60px;
-            line-height: 1.3; /* 줄 간격 추가 */
-            word-break: keep-all; /* 단어 단위 줄바꿈 */
+            line-height: 1.3;
+            word-break: keep-all;
         }
 
         .bingo-cell.marked {
@@ -253,7 +251,7 @@
     <div id="loading" class="loading">
         <div class="spinner"></div>
         <h2>📚 KDC 빙고 로딩중...</h2>
-        <p>게임을 준비하고 있습니다</p>
+        <p>서버에 연결하고 있습니다</p>
     </div>
 
     <div id="app" class="hidden">
@@ -437,7 +435,11 @@
         📚 Made by <strong>2025 사대도협 사무국</strong>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // KDC 주제 데이터
         const KDC_TOPICS = [
             '도서관학', '정보학', '백과사전', '논문작성법', '컴퓨터과학', '인터넷', '저널리즘', '신문학', '잡지학', '출판학',
@@ -466,8 +468,14 @@
                 this.playerCard = [];
                 this.requiredBingoLines = 3;
                 this.isSharedLink = false;
-                this.lastUpdate = Date.now();
                 
+                // Firebase 관련
+                this.db = null;
+                this.auth = null;
+                this.userId = null;
+                this.appId = '';
+                this.unsubscribe = null; // 실시간 리스너 해제 함수
+
                 // 효과음 관련
                 this.audioCtx = null;
                 this.prevPlayerCount = 0;
@@ -506,10 +514,10 @@
                 });
             }
 
-            init() {
+            async init() {
                 this.setupEventListeners();
-                this.loadGameState();
-                this.startSync();
+                await this.initFirebase();
+                await this.loadOrCreateRoom();
                 this.checkConnection();
                 this.hideLoading();
             }
@@ -536,7 +544,7 @@
                 this.ui.adminModeBtn.addEventListener('click', () => this.showPasswordModal());
                 this.ui.joinGameBtn.addEventListener('click', () => this.joinAsPlayer());
                 this.ui.shareGameBtn.addEventListener('click', () => this.showShareModal());
-                this.ui.refreshBtn.addEventListener('click', () => this.refreshGame());
+                this.ui.refreshBtn.addEventListener('click', () => this.loadRemoteState());
                 
                 this.ui.playerNameInput.addEventListener('input', (e) => {
                     this.ui.joinGameBtn.disabled = !e.target.value.trim();
@@ -673,11 +681,36 @@
                 };
             }
 
-            // --- 상태 관리 ---
-            loadGameState() {
+            // --- Firebase 및 상태 관리 ---
+            async initFirebase() {
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                if (!firebaseConfig) {
+                    console.error("Firebase config not found!");
+                    this.showAlert("오류", "게임 서버 설정을 불러올 수 없습니다.");
+                    return;
+                }
+                const app = initializeApp(firebaseConfig);
+                this.db = getFirestore(app);
+                this.auth = getAuth(app);
+                this.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(this.auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(this.auth);
+                    }
+                    this.userId = this.auth.currentUser.uid;
+                } catch (error) {
+                    console.error("Firebase Authentication Error:", error);
+                    this.showAlert("인증 오류", "서버에 연결하는 중 문제가 발생했습니다.");
+                }
+            }
+            
+            async loadOrCreateRoom() {
                 const urlParams = new URLSearchParams(window.location.search);
-                const roomId = urlParams.get('room');
-                
+                let roomId = urlParams.get('room');
+
                 if (roomId) {
                     this.gameRoom = roomId;
                     if (urlParams.get('mode') === 'player') {
@@ -686,20 +719,50 @@
                         this.ui.sharedNotice.classList.remove('hidden');
                         this.ui.shareGameBtn.classList.add('hidden');
                     }
-                    const saved = this.loadSavedState(this.gameRoom);
-                    if (saved) {
-                        this.restoreState(saved);
-                    } else {
-                        // If there's a room ID but no state, create a default one
-                        this.saveState();
-                    }
                 } else {
                     this.gameRoom = this.generateRoomId();
                     this.updateUrl();
-                    this.saveState(); // Save initial empty state
+                    // Create a new room document in Firestore
+                    const initialGameState = this.getInitialState();
+                    const roomRef = doc(this.db, "artifacts", this.appId, "public", "data", "bingo-rooms", this.gameRoom);
+                    await setDoc(roomRef, initialGameState);
                 }
+                
                 this.prevPlayerCount = this.players.size;
-                this.updateUI();
+                this.listenToRoomChanges();
+            }
+
+            listenToRoomChanges() {
+                if (this.unsubscribe) this.unsubscribe(); // 기존 리스너 해제
+
+                const roomRef = doc(this.db, "artifacts", this.appId, "public", "data", "bingo-rooms", this.gameRoom);
+                this.unsubscribe = onSnapshot(roomRef, (doc) => {
+                    if (doc.exists()) {
+                        this.restoreState(doc.data());
+                        this.updatePlayerCard();
+                        this.updateUI();
+                    } else {
+                        console.warn("Room document does not exist!");
+                        this.showAlert("오류", "게임 룸을 찾을 수 없습니다. 새로운 룸을 만듭니다.");
+                        this.gameRoom = this.generateRoomId();
+                        this.updateUrl();
+                        this.performStateUpdate(() => {}); // Create new room
+                    }
+                }, (error) => {
+                    console.error("Firestore listener error:", error);
+                    this.showAlert("연결 오류", "서버와의 실시간 연결에 문제가 발생했습니다.");
+                });
+            }
+            
+            getInitialState() {
+                return {
+                    calledTopics: [],
+                    currentTopic: '',
+                    gameState: 'waiting',
+                    requiredBingoLines: 3,
+                    players: {}, // Firestore는 Map 대신 객체를 사용
+                    lastUpdate: Date.now()
+                };
             }
 
             generateRoomId() {
@@ -708,7 +771,7 @@
 
             updateUrl() {
                 try {
-                    const params = new URLSearchParams();
+                    const params = new URLSearchParams(window.location.search);
                     params.set('room', this.gameRoom);
                     if (this.isSharedLink) params.set('mode', 'player');
                     const newUrl = `${window.location.pathname}?${params.toString()}`;
@@ -718,67 +781,25 @@
                 }
             }
 
-            loadSavedState(roomId) {
-                try {
-                    const saved = localStorage.getItem(`kdc-bingo-${roomId}`);
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        if (Date.now() - data.lastUpdate < 24 * 60 * 60 * 1000) {
-                            return data;
-                        }
-                    }
-                } catch (e) { console.error("상태 로드 실패:", e); }
-                return null;
-            }
-
-            saveState() {
-                try {
-                    const state = {
-                        calledTopics: this.calledTopics,
-                        currentTopic: this.currentTopic,
-                        gameState: this.gameState,
-                        requiredBingoLines: this.requiredBingoLines,
-                        players: Array.from(this.players.entries()),
-                        lastUpdate: Date.now()
-                    };
-                    localStorage.setItem(`kdc-bingo-${this.gameRoom}`, JSON.stringify(state));
-                } catch (e) { console.error("상태 저장 실패:", e); }
-            }
-
             restoreState(saved) {
                 this.calledTopics = saved.calledTopics || [];
                 this.currentTopic = saved.currentTopic || '';
                 this.gameState = saved.gameState || 'waiting';
                 this.requiredBingoLines = saved.requiredBingoLines || 3;
-                this.players = new Map(saved.players || []);
-                this.lastUpdate = saved.lastUpdate || Date.now();
-            }
-
-            startSync() {
-                setInterval(() => {
-                    this.loadRemoteState();
-                }, 1500); // Poll slightly faster
-            }
-
-            loadRemoteState() {
-                const saved = this.loadSavedState(this.gameRoom);
-                if (saved && saved.lastUpdate > this.lastUpdate) {
-                    this.restoreState(saved);
-                    this.updatePlayerCard(); // Update player card if in player mode
-                    this.updateUI(); // Update UI with the new state
-                }
+                // Firestore 객체를 Map으로 변환
+                this.players = new Map(Object.entries(saved.players || {}));
             }
 
             checkConnection() {
-                setInterval(() => {
-                    const online = navigator.onLine;
-                    [this.ui.connection, this.ui.adminConnection, this.ui.playerConnection].forEach(el => {
-                        if (el) {
-                            el.className = `status-badge ${online ? 'status-online' : 'status-offline'}`;
-                            el.textContent = online ? '🌐 실시간 연결' : '📵 오프라인';
-                        }
-                    });
-                }, 3000);
+                // This can be simplified as Firestore handles its own connection status.
+                // We'll keep the UI for user feedback.
+                const online = navigator.onLine;
+                [this.ui.connection, this.ui.adminConnection, this.ui.playerConnection].forEach(el => {
+                    if (el) {
+                        el.className = `status-badge ${online ? 'status-online' : 'status-offline'}`;
+                        el.textContent = online ? '🌐 실시간 연결' : '📵 오프라인';
+                    }
+                });
             }
 
             showScreen(screen) {
@@ -790,19 +811,11 @@
                 this.updateUI();
             }
 
-            // --- 비밀번호 관리 (SHA-256 해싱 사용) ---
-            async hashPassword(password) {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password + this.gameRoom); // 솔트(salt)로 룸 ID 사용
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            }
-
+            // --- 비밀번호 관리 (localStorage 사용) ---
             async showPasswordModal() {
                 this.initAudio();
-                const hasPwd = await this.hasPassword();
-                this.ui.passwordSetup.classList.toggle('hidden', hasPwd);
+                const hasPwd = localStorage.getItem(`admin-pwd-${this.gameRoom}`);
+                this.ui.passwordSetup.classList.toggle('hidden', !!hasPwd);
                 this.ui.passwordVerify.classList.toggle('hidden', !hasPwd);
                 this.clearPasswordInputs();
                 this.ui.passwordModal.classList.add('visible');
@@ -817,29 +830,13 @@
                 this.hidePasswordError();
             }
 
-            async hasPassword() {
-                return localStorage.getItem(`admin-pwd-hash-${this.gameRoom}`) !== null;
-            }
-
-            async savePassword(password) {
-                const hash = await this.hashPassword(password);
-                localStorage.setItem(`admin-pwd-hash-${this.gameRoom}`, hash);
-            }
-
-            async verifyPassword(password) {
-                const storedHash = localStorage.getItem(`admin-pwd-hash-${this.gameRoom}`);
-                if (!storedHash) return false;
-                const inputHash = await this.hashPassword(password);
-                return storedHash === inputHash;
-            }
-
             async confirmPassword() {
                 this.initAudio();
-                const hasPwd = await this.hasPassword();
+                const storedPwd = localStorage.getItem(`admin-pwd-${this.gameRoom}`);
                 
-                if (hasPwd) {
+                if (storedPwd) {
                     const password = this.ui.verifyPassword.value;
-                    if (await this.verifyPassword(password)) {
+                    if (password === storedPwd) {
                         this.hidePasswordModal();
                         this.showScreen('admin');
                     } else {
@@ -858,7 +855,7 @@
                         return;
                     }
                     
-                    await this.savePassword(newPwd);
+                    localStorage.setItem(`admin-pwd-${this.gameRoom}`, newPwd);
                     this.hidePasswordModal();
                     this.showScreen('admin');
                     this.showAlert('🔐 설정 완료', '관리자 비밀번호가 설정되었습니다!');
@@ -866,23 +863,22 @@
             }
 
             validatePassword() {
-                this.hasPassword().then(hasPwd => {
-                    const confirmBtn = this.ui.passwordConfirm;
-                    if (hasPwd) {
-                        const password = this.ui.verifyPassword.value;
-                        confirmBtn.disabled = password.length !== 4;
-                        confirmBtn.textContent = '🔓 로그인';
-                    } else {
-                        const newPwd = this.ui.newPassword.value;
-                        const confirmPwd = this.ui.confirmPassword.value;
-                        const valid = newPwd.length === 4 && confirmPwd.length === 4;
-                        confirmBtn.disabled = !valid;
-                        confirmBtn.textContent = '🔐 비밀번호 설정';
-                        
-                        if (valid && newPwd !== confirmPwd) this.showPasswordError('비밀번호가 일치하지 않습니다');
-                        else this.hidePasswordError();
-                    }
-                });
+                const storedPwd = localStorage.getItem(`admin-pwd-${this.gameRoom}`);
+                const confirmBtn = this.ui.passwordConfirm;
+                if (storedPwd) {
+                    const password = this.ui.verifyPassword.value;
+                    confirmBtn.disabled = password.length !== 4;
+                    confirmBtn.textContent = '🔓 로그인';
+                } else {
+                    const newPwd = this.ui.newPassword.value;
+                    const confirmPwd = this.ui.confirmPassword.value;
+                    const valid = newPwd.length === 4 && confirmPwd.length === 4;
+                    confirmBtn.disabled = !valid;
+                    confirmBtn.textContent = '🔐 비밀번호 설정';
+                    
+                    if (valid && newPwd !== confirmPwd) this.showPasswordError('비밀번호가 일치하지 않습니다');
+                    else this.hidePasswordError();
+                }
             }
 
             showPasswordError(msg) {
@@ -899,14 +895,14 @@
 
             changePassword() {
                 this.showConfirm('🔐 비밀번호 변경', '관리자 비밀번호를 변경하시겠습니까? 현재 비밀번호는 삭제됩니다.', () => {
-                    localStorage.removeItem(`admin-pwd-hash-${this.gameRoom}`);
+                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
                     this.showPasswordModal();
                 });
             }
 
             resetPassword() {
                 this.showConfirm('🔄 비밀번호 재설정', '비밀번호를 재설정하시겠습니까?', () => {
-                    localStorage.removeItem(`admin-pwd-hash-${this.gameRoom}`);
+                    localStorage.removeItem(`admin-pwd-${this.gameRoom}`);
                     this.hidePasswordModal();
                     this.showPasswordModal();
                 });
@@ -943,21 +939,36 @@
             }
 
             // --- 게임 로직 (Read-Modify-Write 패턴 적용) ---
-            performStateUpdate(updateFunction) {
-                // 1. READ: 최신 상태를 읽어옵니다.
-                const latestState = this.loadSavedState(this.gameRoom);
-                if (latestState) {
-                    this.restoreState(latestState);
+            async performStateUpdate(updateFunction) {
+                const roomRef = doc(this.db, "artifacts", this.appId, "public", "data", "bingo-rooms", this.gameRoom);
+                try {
+                    const docSnap = await getDoc(roomRef);
+                    let currentState = docSnap.exists() ? docSnap.data() : this.getInitialState();
+                    
+                    // Firestore 객체를 Map으로 변환하여 로컬 상태에 반영
+                    this.restoreState(currentState);
+
+                    // 로컬 상태 수정
+                    updateFunction.call(this);
+
+                    // Map을 다시 Firestore가 이해하는 객체로 변환
+                    const playersObject = Object.fromEntries(this.players);
+
+                    // Firestore에 저장할 최종 데이터
+                    const newState = {
+                        calledTopics: this.calledTopics,
+                        currentTopic: this.currentTopic,
+                        gameState: this.gameState,
+                        requiredBingoLines: this.requiredBingoLines,
+                        players: playersObject,
+                        lastUpdate: Date.now()
+                    };
+
+                    await setDoc(roomRef, newState);
+                } catch (error) {
+                    console.error("상태 업데이트 실패:", error);
+                    this.showAlert("오류", "게임 상태 업데이트에 실패했습니다.");
                 }
-
-                // 2. MODIFY: 전달된 함수를 실행하여 상태를 변경합니다.
-                updateFunction.call(this);
-
-                // 3. WRITE: 변경된 최신 상태를 저장합니다.
-                this.saveState();
-
-                // 4. 즉시 자신의 UI를 업데이트합니다.
-                this.updateUI();
             }
 
             joinAsPlayer() {
@@ -967,7 +978,7 @@
 
                 this.performStateUpdate(() => {
                     this.playerName = name;
-                    this.playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                    this.playerId = this.userId; // Firebase UID를 플레이어 ID로 사용
                     this.playerCard = this.generateBingoCard();
                     this.playerCard[12].marked = true; // 가운데 FREE
 
@@ -1000,12 +1011,10 @@
             checkBingo(card) {
                 const grid = Array.from({ length: 5 }, (_, i) => card.slice(i * 5, (i + 1) * 5));
                 let count = 0;
-                // 가로, 세로
                 for (let i = 0; i < 5; i++) {
                     if (grid[i].every(cell => cell.marked)) count++;
                     if (grid.every(row => row[i].marked)) count++;
                 }
-                // 대각선
                 if (grid.every((row, i) => row[i].marked)) count++;
                 if (grid.every((row, i) => row[4 - i].marked)) count++;
                 return count;
@@ -1022,11 +1031,8 @@
             resetGame() {
                 this.showConfirm('🔄 게임 초기화', '정말로 게임을 초기화하시겠습니까? 모든 참가자 정보가 사라집니다.', () => {
                     this.performStateUpdate(() => {
-                        this.calledTopics = [];
-                        this.currentTopic = '';
-                        this.gameState = 'waiting';
+                        Object.assign(this, this.getInitialState());
                         this.players.clear();
-                        this.requiredBingoLines = 3;
                     });
                 });
             }
@@ -1074,16 +1080,14 @@
                 });
             }
 
-            refreshGame() {
-                this.loadRemoteState();
-            }
-
-            getLeaderboard() {
-                return Array.from(this.players.values())
-                    .sort((a, b) => {
-                        if (b.bingoLines !== a.bingoLines) return b.bingoLines - a.bingoLines;
-                        return a.joinTime - b.joinTime;
-                    });
+            async loadRemoteState() {
+                const roomRef = doc(this.db, "artifacts", this.appId, "public", "data", "bingo-rooms", this.gameRoom);
+                const docSnap = await getDoc(roomRef);
+                if (docSnap.exists()) {
+                    this.restoreState(docSnap.data());
+                    this.updatePlayerCard();
+                    this.updateUI();
+                }
             }
 
             // --- UI 업데이트 ---
@@ -1123,7 +1127,6 @@
                 this.ui.adminCompleted.textContent = leaderboard.filter(p => this.isBingoComplete(p.bingoLines)).length;
                 this.ui.rankCount.textContent = playerCount;
 
-                // Game Controls
                 const toggleBtn = this.ui.gameToggle;
                 if (this.gameState === 'playing') {
                     toggleBtn.textContent = '⏸️ 일시정지';
